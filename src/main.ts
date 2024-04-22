@@ -1,4 +1,4 @@
-import { NestFactory, Reflector } from "@nestjs/core";
+import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import {
   ExpressAdapter,
@@ -76,6 +76,7 @@ async function bootstrap() {
     )
     .setVersion("1.0")
     .build();
+  
   const documentApi = SwaggerModule.createDocument(app, configSwagger);
   SwaggerModule.setup("api-backoffice-empresa/documentacion", app, documentApi);
 
