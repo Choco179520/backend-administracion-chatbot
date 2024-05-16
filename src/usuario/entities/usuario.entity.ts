@@ -46,6 +46,7 @@ export class UsuarioEntity {
     @Column({
         type: 'smalldatetime',
         name: 'FECHA_ULTIMO_ACCESO',
+        nullable: true
     })
     fechaUltimoAcceso?: string;
 

@@ -4,7 +4,6 @@ import config from '../environment/config';
 import {Crypto} from '../common/middlewares/crypto';
 import {TypeOrmModule} from '@nestjs/typeorm';
 import {ENTIDADES_APLICATIVO} from '../common/entidades-aplicativo';
-import {MongooseModule} from "@nestjs/mongoose";
 
 @Global()
 @Module({
@@ -50,9 +49,6 @@ import {MongooseModule} from "@nestjs/mongoose";
             },
             inject: [config.KEY],
         }),
-        MongooseModule.forRoot(
-            'mongodb+srv://proyecto:Cz45StecpjEGt3uN@proyectos.k24kntm.mongodb.net/back-office',
-        ),
     ],
 })
 export class DatabaseModule {

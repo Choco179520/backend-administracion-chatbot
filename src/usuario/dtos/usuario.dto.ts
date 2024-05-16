@@ -20,10 +20,6 @@ export class CreateUsuarioDto {
 
     @IsOptional()
     @IsString()
-    fechaUltimoAcceso?: string;
-
-    @IsOptional()
-    @IsString()
     fechaRegistro?: string;
 
     @IsNotEmpty()
@@ -32,6 +28,10 @@ export class CreateUsuarioDto {
 }
 
 export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
+    @IsOptional()
+    @IsString()
+    fechaUltimoAcceso?: string;
+    
     @IsOptional()
     @IsNumber()
     readonly estado? = 1 | 0;

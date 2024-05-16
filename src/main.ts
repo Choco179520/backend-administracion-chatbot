@@ -34,7 +34,7 @@ async function bootstrap() {
     AppModule,
     new ExpressAdapter(server)
   );
-  app.setGlobalPrefix("api-backoffice-empresa");
+  app.setGlobalPrefix("api-backoffice-chatbot");
 
   app.use(bodyParser.json({ limit: "50mb" }));
   app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
@@ -70,22 +70,22 @@ async function bootstrap() {
 
   /** Configuracion de swagger modulo */
   const configSwagger = new DocumentBuilder()
-    .setTitle("API BACKOFFICE IMAKSMART")
+    .setTitle("API BACKOFFICE CHATBOT")
     .setDescription(
-      "El api es desarrollada por el equipo de DESARROLLO IMAKSMART"
+      "El api es desarrollada para la gestion y administracion del CHATBOT EPN"
     )
     .setVersion("1.0")
     .build();
   
   const documentApi = SwaggerModule.createDocument(app, configSwagger);
-  SwaggerModule.setup("api-backoffice-empresa/documentacion", app, documentApi);
+  SwaggerModule.setup("api-backoffice-chatbot/documentacion", app, documentApi);
 
   /** Registra el interceptor para encriptar las respuestas **/
-  app.useGlobalInterceptors(new EncryptInterceptor());
+  // app.useGlobalInterceptors(new EncryptInterceptor());
   const serverHttps = https.createServer(httpsOptions, server);
 
   await app.init();
-  serverHttps.listen(process.env.PORT || 3001);
+  serverHttps.listen(process.env.PORT || 3000);
   // await app.listen(process.env.PORT ||3001);
   // console.log(app)
   logger.debug(
