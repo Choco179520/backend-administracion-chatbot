@@ -16,13 +16,29 @@ export class CreateDocumentDto {
   @IsString()
   readonly title?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsInt()
   readonly idChatbot?: number;
 
   @IsOptional()
   @IsNumber()
   readonly estado? = 1 | 0;
+
+  @IsOptional()
+  @IsNumber()
+  readonly eliminar? = 1 | 0;
+
+  @IsOptional()
+  @IsString()
+  fechaCreacion?: string;
 }
 
-export class UpdateDocumentDto extends PartialType(CreateDocumentDto) {}
+export class UpdateDocumentDto extends PartialType(CreateDocumentDto) {
+  @IsOptional()
+  @IsString()
+  fechaActualizacion?: string;
+
+  @IsOptional()
+  @IsString()
+  fechaSolicitudEliminacion?: string;
+}

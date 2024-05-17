@@ -5,11 +5,12 @@ import { catchError, firstValueFrom, map, throwError } from "rxjs";
 import { ErrorHandlerService } from "src/common/error-handler/error-handler.service";
 import config from "src/environment/config";
 import { DocumentService } from "./document.service";
-import { CreateDocumentDto } from "../dtos/document.dto";
-import { CreateUtteranceDto } from "../dtos/utterance.dto";
-import { CreateResponseDto } from "../dtos/response.dto";
+import { CreateDocumentDto, UpdateDocumentDto } from "../dtos/document.dto";
+import { CreateUtteranceDto, UpdateUtteranceDto } from "../dtos/utterance.dto";
+import { CreateResponseDto, UpdateResponseDto } from "../dtos/response.dto";
 import { ResponseService } from "./response.service";
 import { UtteranceService } from "./utterance.service";
+import { format } from "date-fns";
 
 @Injectable()
 export class ChatbotService {
@@ -25,6 +26,7 @@ export class ChatbotService {
     private readonly _utteranceService: UtteranceService
   ) {}
 
+  /** Sincronizar la base de datos del chatbot con la local */
   async synchronizeDocuments() {
     try {
       let documents;
@@ -103,6 +105,7 @@ export class ChatbotService {
     }
   }
 
+  /** Funciones para manejar data local y posterior match hacia el chatbot  */
   async getDocumentsLocal() {
     try {
       const documents = await this._documentService.buscarTodos({
@@ -122,6 +125,38 @@ export class ChatbotService {
         }
       );
       Logger.error("_chatbotService.getDocuments(), ocurrio un error");
+      this.errorHandlerService.handleCustomError(err.response);
+    }
+  }
+
+  async postDocumentLocal(payload: CreateDocumentDto) {
+    try {
+      payload.fechaCreacion = format(new Date(), "yyyy-MM-dd HH:mm:ss");
+      return this._documentService.crearUno(payload);
+    } catch (err) {
+      console.error(
+        "Error documentos - No se pudo crear un registr local de documentos",
+        {
+          error: err.response,
+        }
+      );
+      Logger.error("_chatbotService.postDocumentLocal(), ocurrio un error");
+      this.errorHandlerService.handleCustomError(err.response);
+    }
+  }
+
+  async putDocumentLocal(id: number, payload: UpdateDocumentDto) {
+    try {
+      payload.fechaActualizacion = format(new Date(), "yyyy-MM-dd HH:mm:ss");
+      return this._documentService.actualizarPorId(id, payload);
+    } catch (err) {
+      console.error(
+        "Error documentos - No se pudo actualizar un registro local de documentos",
+        {
+          error: err.response,
+        }
+      );
+      Logger.error("_chatbotService.putDocumentLocal(), ocurrio un error");
       this.errorHandlerService.handleCustomError(err.response);
     }
   }
@@ -148,6 +183,36 @@ export class ChatbotService {
     }
   }
 
+  async postResponseLocal(payload: CreateResponseDto) {
+    try {
+      return this._responseService.crearUno(payload);
+    } catch (err) {
+      console.error(
+        "Error respuesta - No se pudo crear una respuesta local de documentos",
+        {
+          error: err.response,
+        }
+      );
+      Logger.error("_chatbotService.postResponseLocal(), ocurrio un error");
+      this.errorHandlerService.handleCustomError(err.response);
+    }
+  }
+
+  async putResponseLocal(id: number, payload: UpdateResponseDto) {
+    try {
+      return this._responseService.actualizarPorId(id, payload);
+    } catch (err) {
+      console.error(
+        "Error documentos - No se pudo actualizar una respuesta local",
+        {
+          error: err.response,
+        }
+      );
+      Logger.error("_chatbotService.putResponseLocal(), ocurrio un error");
+      this.errorHandlerService.handleCustomError(err.response);
+    }
+  }
+
   async getUtterancesLocalById(id: number) {
     try {
       const utterances = await this._utteranceService.buscarTodos({
@@ -166,125 +231,124 @@ export class ChatbotService {
     }
   }
 
-  // async getDocuments() {
-  //   try {
-  //     let documents;
-  //     const pathGetDocuments = this.url + `/documents`;
-  //     Logger.verbose(`Get documents....`);
+  async postUtteranceLocal(payload: CreateUtteranceDto) {
+    try {
+      return this._utteranceService.crearUno(payload);
+    } catch (err) {
+      console.error(
+        "Error expresiones - No se pudo crear una expresion local de documentos",
+        {
+          error: err.response,
+        }
+      );
+      Logger.error("_chatbotService.postUtteranceLocal(), ocurrio un error");
+      this.errorHandlerService.handleCustomError(err.response);
+    }
+  }
 
-  //     documents = await firstValueFrom(
-  //       this._httpService.get(pathGetDocuments).pipe(
-  //         map((response) => {
-  //           if (response.status == 200) {
-  //             return response.data;
-  //           }
-  //         }),
-  //         catchError((err1) => {
-  //           throw this.errorHandlerService.handleCustomError(err1.response);
-  //         })
-  //       )
-  //     );
+  async putUtteranceLocal(id: number, payload: UpdateUtteranceDto) {
+    try {
+      return this._utteranceService.actualizarPorId(id, payload);
+    } catch (err) {
+      console.error(
+        "Error documentos - No se pudo actualizar una expresion local",
+        {
+          error: err.response,
+        }
+      );
+      Logger.error("_chatbotService.putUtteranceLocal(), ocurrio un error");
+      this.errorHandlerService.handleCustomError(err.response);
+    }
+  }
 
-  //     const responsesAll = await this.getResponses();
-  //     documents.map((document) => {
-  //       const responseD = responsesAll.find(
-  //         (resp) => resp.id == document.response_set_id
-  //       );
-  //       if (responseD) {
-  //         document.responses = responseD.responses.length;
-  //         document.utterances = document.utterances.length;
-  //       }
-  //       return document;
-  //     });
+  /** Servicios para manejar el chatbot */
+  async getDocuments() {
+    try {
+      let documents;
+      const pathGetDocuments = this.url + `/documents`;
+      Logger.verbose(`Get documents....`);
 
-  //     return documents;
-  //   } catch (err) {
-  //     console.error(
-  //       "Error obtener documentos - No se pudo obtener la lista de documentos",
-  //       {
-  //         error: err.response,
-  //       }
-  //     );
-  //     Logger.error("_chatbotService.getDocuments(), ocurrio un error");
-  //     this.errorHandlerService.handleCustomError(err.response);
-  //   }
-  // }
+      documents = await firstValueFrom(
+        this._httpService.get(pathGetDocuments).pipe(
+          map((response) => {
+            if (response.status == 200) {
+              return response.data;
+            }
+          }),
+          catchError((err1) => {
+            throw this.errorHandlerService.handleCustomError(err1.response);
+          })
+        )
+      );
 
-  // async getUtterencesById(id: number) {
-  //   try {
-  //     let documents;
-  //     const pathGetDocuments = this.url + `/documents/${id}`;
-  //     Logger.verbose(`Get utterences by id - ${id} ....`);
+      const responsesAll = await this.getResponses();
+      documents.map((document) => {
+        const responseD = responsesAll.find(
+          (resp) => resp.id == document.response_set_id
+        );
+        if (responseD) {
+          document.responses = responseD.responses.length;
+          document.utterances = document.utterances.length;
+        }
+        return document;
+      });
 
-  //     documents = await firstValueFrom(
-  //       this._httpService.get(pathGetDocuments).pipe(
-  //         map((response) => {
-  //           if (response.status == 200) {
-  //             return response.data.utterances;
-  //           }
-  //         }),
-  //         catchError((err1) => {
-  //           throw this.errorHandlerService.handleCustomError(err1.response);
-  //         })
-  //       )
-  //     );
+      return documents;
+    } catch (err) {
+      console.error(
+        "Error obtener documentos - No se pudo obtener la lista de documentos",
+        {
+          error: err.response,
+        }
+      );
+      Logger.error("_chatbotService.getDocuments(), ocurrio un error");
+      this.errorHandlerService.handleCustomError(err.response);
+    }
+  }
 
-  //     const responsesAll = await this.getResponses();
-  //     documents.map((document) => {
-  //       const responseD = responsesAll.find(
-  //         (resp) => resp.id == document.response_set_id
-  //       );
-  //       if (responseD) {
-  //         document.responses = responseD.responses.length;
-  //         document.utterances = document.utterances.length;
-  //       }
-  //       return document;
-  //     });
+  async getDocumentsById(id: number) {
+    try {
+      let documents;
+      const pathGetDocuments = this.url + `/documents/${id}`;
+      Logger.verbose(`Get utterences by id - ${id} ....`);
 
-  //     return documents;
-  //   } catch (err) {
-  //     console.error(
-  //       "Error obtener documentos - No se pudo obtener la lista de documentos",
-  //       {
-  //         error: err.response,
-  //       }
-  //     );
-  //     Logger.error("_chatbotService.getDocuments(), ocurrio un error");
-  //     this.errorHandlerService.handleCustomError(err.response);
-  //   }
-  // }
+      documents = await firstValueFrom(
+        this._httpService.get(pathGetDocuments).pipe(
+          map((response) => {
+            if (response.status == 200) {
+              return response.data.utterances;
+            }
+          }),
+          catchError((err1) => {
+            throw this.errorHandlerService.handleCustomError(err1.response);
+          })
+        )
+      );
 
-  // async postDocument(data) {
-  //   try {
-  //     let documents;
-  //     const pathPostDocuments = this.url + `/documents`;
+      const responsesAll = await this.getResponses();
+      documents.map((document) => {
+        const responseD = responsesAll.find(
+          (resp) => resp.id == document.response_set_id
+        );
+        if (responseD) {
+          document.responses = responseD.responses.length;
+          document.utterances = document.utterances.length;
+        }
+        return document;
+      });
 
-  //     Logger.verbose(`Post documents....`);
-
-  //     documents = await firstValueFrom(
-  //       this._httpService.post(pathPostDocuments).pipe(
-  //         map((response) => {
-  //           if (response.status == 200) {
-  //             return response.data;
-  //           }
-  //         }),
-  //         catchError((err1) => {
-  //           throw this.errorHandlerService.handleCustomError(err1.response);
-  //         })
-  //       )
-  //     );
-  //     return documents;
-  //   } catch (err) {
-  //     console.error(
-  //       "Error obtener documentos - No se pudo obtener la lista de documentos",
-  //       {
-  //         error: err.response,
-  //       }
-  //     );
-  //     Logger.error("_chatbotService.getDocuments(), ocurrio un error");
-  //     this.errorHandlerService.handleCustomError(err.response);
-  //   }
-  // }
+      return documents;
+    } catch (err) {
+      console.error(
+        "Error obtener documentos - No se pudo obtener la lista de documentos",
+        {
+          error: err.response,
+        }
+      );
+      Logger.error("_chatbotService.getDocuments(), ocurrio un error");
+      this.errorHandlerService.handleCustomError(err.response);
+    }
+  }
 
   async getResponses() {
     try {
@@ -318,34 +382,99 @@ export class ChatbotService {
     }
   }
 
-  // async getResponsesById(id: number) {
-  //   try {
-  //     let responses;
-  //     const pathGetResponses = this.url + `/response-sets/${id}`;
-  //     Logger.verbose(`Get responses by id - ${id} ....`);
+  async postDocument(data) {
+    try {
+      let documents;
+      const pathPostDocuments = this.url + `/documents`;
 
-  //     responses = await firstValueFrom(
-  //       this._httpService.get(pathGetResponses).pipe(
-  //         map((response) => {
-  //           if (response.status == 200) {
-  //             return response.data.responses;
-  //           }
-  //         }),
-  //         catchError((err1) => {
-  //           throw this.errorHandlerService.handleCustomError(err1.response);
-  //         })
-  //       )
-  //     );
-  //     return responses;
-  //   } catch (err) {
-  //     console.error(
-  //       "Error obtener documentos - No se pudo obtener la lista de documentos",
-  //       {
-  //         error: err.response,
-  //       }
-  //     );
-  //     Logger.error("_chatbotService.getDocuments(), ocurrio un error");
-  //     this.errorHandlerService.handleCustomError(err.response);
-  //   }
-  // }
+      Logger.verbose(`Post documents....`);
+
+      documents = await firstValueFrom(
+        this._httpService.post(pathPostDocuments).pipe(
+          map((response) => {
+            if (response.status == 200) {
+              return response.data;
+            }
+          }),
+          catchError((err1) => {
+            throw this.errorHandlerService.handleCustomError(err1.response);
+          })
+        )
+      );
+      return documents;
+    } catch (err) {
+      console.error(
+        "Error obtener documentos - No se pudo obtener la lista de documentos",
+        {
+          error: err.response,
+        }
+      );
+      Logger.error("_chatbotService.getDocuments(), ocurrio un error");
+      this.errorHandlerService.handleCustomError(err.response);
+    }
+  }
+
+  async updateDocuments(id: number, data: any) {
+    try {
+      let documents;
+      const pathGetResponses = this.url + `/documents/${id}`;
+
+      Logger.verbose(`updateDocuments....`);
+
+      documents = await firstValueFrom(
+        this._httpService.put(pathGetResponses, data).pipe(
+          map((response) => {
+            if (response.status == 200) {
+              return response.data;
+            }
+          }),
+          catchError((err1) => {
+            throw this.errorHandlerService.handleCustomError(err1.response);
+          })
+        )
+      );
+      return documents;
+    } catch (err) {
+      console.error(
+        "Error obtener documentos - No se pudo obtener la lista de documentos",
+        {
+          error: err.response,
+        }
+      );
+      Logger.error("_chatbotService.updateDocuments(), ocurrio un error");
+      this.errorHandlerService.handleCustomError(err.response);
+    }
+  }
+
+  async updateResponses(id: number, data: any) {
+    try {
+      let responses;
+      const pathGetResponses = this.url + `/response-sets/${id}`;
+
+      Logger.verbose(`updateResponses....`);
+
+      responses = await firstValueFrom(
+        this._httpService.put(pathGetResponses, data).pipe(
+          map((response) => {
+            if (response.status == 200) {
+              return response.data;
+            }
+          }),
+          catchError((err1) => {
+            throw this.errorHandlerService.handleCustomError(err1.response);
+          })
+        )
+      );
+      return responses;
+    } catch (err) {
+      console.error(
+        "Error obtener documentos - No se pudo obtener la lista de documentos",
+        {
+          error: err.response,
+        }
+      );
+      Logger.error("_chatbotService.updateResponses(), ocurrio un error");
+      this.errorHandlerService.handleCustomError(err.response);
+    }
+  }
 }

@@ -27,7 +27,6 @@ export class PrincipalService<Entity, CreateDto, UpdateDto> {
             );
             if (relation?.hijos) {
               for (const hijo of relation.hijos) {
-                console.log(relation?.hijos, "hijos....");
                 query.orWhere(`${relation.name}.${hijo.key} = ${hijo.value}`);
               }
             }
