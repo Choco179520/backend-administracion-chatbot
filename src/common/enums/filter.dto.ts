@@ -15,15 +15,15 @@ export class FilterDto {
 
   @ApiProperty({
     description: 'Relaciones para busqueda',
-    type: [String],
+    type: [],
   })
   @IsOptional()
-  readonly relations?: string[];
+  readonly relations?: any[];
 
   @ApiProperty({
     description: 'Parms enviados para busqueda',
     type: [],
   })
   @IsOptional()
-  readonly busqueda?: [];
+  readonly busqueda?: any[];
 }

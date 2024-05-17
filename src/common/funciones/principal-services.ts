@@ -15,15 +15,22 @@ export class PrincipalService<Entity, CreateDto, UpdateDto> {
   /** Obtener todos los resultados */
   async buscarTodos(criterioBusqueda?: FilterDto): Promise<Entity[] | any> {
     try {
-      const query = await this._repository.createQueryBuilder(this.nameEntity);
+      let query = await this._repository.createQueryBuilder(this.nameEntity);
       if (criterioBusqueda) {
         if ("relations" in criterioBusqueda) {
           const { relations } = criterioBusqueda;
+          // console.log(relations, 'relations');
           for (const relation of relations) {
             query.innerJoinAndSelect(
-              `${this.nameEntity}.${relation}`,
-              relation
+              `${this.nameEntity}.${relation.name}`,
+              relation.name
             );
+            if (relation?.hijos) {
+              for (const hijo of relation.hijos) {
+                console.log(relation?.hijos, "hijos....");
+                query.orWhere(`${relation.name}.${hijo.key} = ${hijo.value}`);
+              }
+            }
           }
         }
         if ("estado" in criterioBusqueda) {
@@ -38,8 +45,7 @@ export class PrincipalService<Entity, CreateDto, UpdateDto> {
           }
         }
         if ("busqueda" in criterioBusqueda) {
-          let busqueda: any = criterioBusqueda;
-          busqueda = JSON.parse(busqueda.busqueda);
+          let { busqueda }: any = criterioBusqueda;
           for (let opcion of busqueda) {
             query.orWhere(`${opcion.key} like '%${opcion.value}%'`);
           }
@@ -159,13 +165,32 @@ export class PrincipalService<Entity, CreateDto, UpdateDto> {
   /** Delete informacion por campo y data enviada */
   async deletePorId(parametro: number) {
     try {
-      const deleteRecord = await this._repository.delete(parametro);      
+      const deleteRecord = await this._repository.delete(parametro);
       if (!deleteRecord.affected) {
         throw new ErrorManager({
           type: "BAD_REQUEST",
           message: "No se pudo eliminar registro",
         });
       }
+      return deleteRecord;
+    } catch (err) {
+      throw ErrorManager.createSignatureError(err.message);
+    }
+  }
+
+  /** Delete toda informacion por campo y data enviada */
+  async deleteAll() {
+    try {
+      const nameData = this.nameEntity.split("Entity")[0].toUpperCase();
+      console.log(this.nameEntity, "this.nameEntity.....", nameData);
+      const resetQuery = `DBCC CHECKIDENT ('EPN.ADMINISTRACION_CHATBOT.${nameData}', RESEED, 0)`;
+      await this._repository.query(resetQuery);
+
+      const deleteRecord = await this._repository
+        .createQueryBuilder()
+        .delete()
+        .from(this.nameEntity)
+        .execute();
       return deleteRecord;
     } catch (err) {
       throw ErrorManager.createSignatureError(err.message);
