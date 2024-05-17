@@ -7,7 +7,6 @@ import * as process from 'process';
 export default registerAs('config', () => {
   return {
     port: process.env.PORT,
-    portSockets: process.env.PORT_SOCKETS,
     configuracion: {
       certificatePassword: process.env.CERTIFICATE_PASSWORD,
       secreto: process.env.SECRETO,
@@ -15,8 +14,6 @@ export default registerAs('config', () => {
       passwordGenerico: process.env.PASSWORD_GENERICO,
       expiracion: process.env.EXPIRACION,
       seguridad: process.env.SEGURIDAD,
-      horaInicio: process.env.HORA_INICIO,
-      horaFin: process.env.HORA_FIN,
     },
     db: {
       port: Number(process.env.DATABASE_PORT),
@@ -26,12 +23,7 @@ export default registerAs('config', () => {
       database: process.env.DATABASE_NAME,
       schema: process.env.DATABASE_SCHEMA,
     },
-    dbMongo: {
-      host: process.env.DATABASE_HOST_MONGO,
-      username: process.env.DATABASE_USER_MONGO,
-      password: process.env.DATABASE_PASSWORD_MONGO,
-      database: process.env.DATABASE_NAME_MONGO,
-    },
+    url_chatbot: process.env.URL_CHATBOT_DB
   };
 });
 
@@ -57,11 +49,8 @@ export const CONFIG_MODULE: ConfigModuleOptions = {
     DATABASE_NAME: Joi.string().required(),
     DATABASE_SCHEMA: Joi.string().required(),
 
-    /** Database Mongo **/
-    DATABASE_HOST_MONGO: Joi.string().required(),
-    DATABASE_USER_MONGO: Joi.string().required(),
-    DATABASE_PASSWORD_MONGO: Joi.string().required(),
-    DATABASE_NAME_MONGO: Joi.string().required(),
+    /** URL conexion api de chatbot */
+    URL_CHATBOT_DB: Joi.string().required(),
   }),
   expandVariables: true,
 };
