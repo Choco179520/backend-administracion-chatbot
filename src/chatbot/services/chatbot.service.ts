@@ -11,7 +11,6 @@ import { CreateResponseDto, UpdateResponseDto } from "../dtos/response.dto";
 import { ResponseService } from "./response.service";
 import { UtteranceService } from "./utterance.service";
 import { format } from "date-fns";
-import { log } from "console";
 
 @Injectable()
 export class ChatbotService {
@@ -238,7 +237,8 @@ export class ChatbotService {
     try {
       console.log(id,'-- putResponseLocal --', payload);
       const jsonDocument = {estado: 0};
-      await this._documentService.actualizarPorId(payload.document, jsonDocument);
+      const act = await this._documentService.actualizarPorId(+payload.document, jsonDocument);
+      console.log(act, 'update...', +payload.document);
       return this._responseService.actualizarPorId(id, payload);
     } catch (err) {
       console.error(

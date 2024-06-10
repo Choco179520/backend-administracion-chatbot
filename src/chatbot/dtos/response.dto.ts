@@ -18,7 +18,6 @@ export class CreateResponseDto {
   @IsNumber()
   readonly eliminar? = 1 | 0;
 
-
   @IsOptional()
   @IsInt()
   readonly document?: number;

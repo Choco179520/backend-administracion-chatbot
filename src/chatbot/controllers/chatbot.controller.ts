@@ -85,10 +85,6 @@ export class ChatbotController {
     return this._chatbotService.putUtteranceLocal(params.id, payload);
   }
 
-
-
-
-
   @ApiOperation({ description: "Obtener respuestas por documento por id" })
   @Get("responses/:id")
   getResponsesLocalById(@Param() params: any) {
@@ -109,22 +105,15 @@ export class ChatbotController {
     @Body() payload: UpdateResponseDto
   ) {
     console.log(payload, "data paylaod acualizar responses", params);
-    return this._chatbotService.putResponseLocal(params.id, payload);
+    return this._chatbotService.putResponseLocal(+params.id, payload);
   }
 
+  /** ENVIAR PARAMETROS A CHATBOT */
   @ApiOperation({
     description: "Obtener lista de respuestas por documento local",
   })
-  @Post("responses")
-  getResponses(@Body() payload: any) {
+  @Post("update-chatbot")
+  postChatbot(@Body() payload: any) {
     // return this._chatbotService.getResponsesById(payload.id);
-  }
-
-  @ApiOperation({
-    description: "Obtener lista de expresiones por documento local",
-  })
-  @Get("responses/:id")
-  getResponsesById(@Param() params: any) {
-    // return this._chatbotService.getResponsesById(params.id);
   }
 }
