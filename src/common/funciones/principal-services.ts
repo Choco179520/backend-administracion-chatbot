@@ -181,7 +181,6 @@ export class PrincipalService<Entity, CreateDto, UpdateDto> {
   async deleteAll() {
     try {
       const nameData = this.nameEntity.split("Entity")[0].toUpperCase();
-      console.log(this.nameEntity, "this.nameEntity.....", nameData);
       const resetQuery = `DBCC CHECKIDENT ('EPN.ADMINISTRACION_CHATBOT.${nameData}', RESEED, 0)`;
       await this._repository.query(resetQuery);
 

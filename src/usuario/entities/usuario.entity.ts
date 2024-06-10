@@ -44,7 +44,7 @@ export class UsuarioEntity {
     telefono?: string;
 
     @Column({
-        type: 'smalldatetime',
+        type: 'date',
         name: 'FECHA_ULTIMO_ACCESO',
         nullable: true
     })
@@ -52,7 +52,7 @@ export class UsuarioEntity {
 
     @Exclude()
     @Column({
-        type: 'smalldatetime',
+        type: 'date',
         name: 'FECHA_REGISTRO',
     })
     fechaRegistro?: string;

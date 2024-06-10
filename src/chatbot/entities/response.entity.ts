@@ -20,14 +20,29 @@ export class ResponseEntity {
   id?: number;
 
   @Column({
-    type: "varchar",
+    type: "text",
     name: "RESPONSE",
-    length: "MAX",
+    // length: "max_value",
   })
   response?: string;
 
+  @Column({
+    type: "tinyint",
+    name: "ESTADO",
+    default: 1,
+  })
+  estado? = 1 | 0;
+
+  @Column({
+    type: "tinyint",
+    name: "ELIMINAR",
+    default: 0,
+  })
+  eliminar? = 1 | 0;
+
   @ManyToOne(() => DocumentEntity, (document) => document.responses, {
     nullable: true,
+    onDelete: 'CASCADE'
   })
   @JoinColumn({
     name: "ID_DOCUMENT",

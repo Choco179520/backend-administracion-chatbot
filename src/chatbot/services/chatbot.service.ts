@@ -11,6 +11,7 @@ import { CreateResponseDto, UpdateResponseDto } from "../dtos/response.dto";
 import { ResponseService } from "./response.service";
 import { UtteranceService } from "./utterance.service";
 import { format } from "date-fns";
+import { log } from "console";
 
 @Injectable()
 export class ChatbotService {
@@ -47,7 +48,7 @@ export class ChatbotService {
             throw this.errorHandlerService.handleCustomError(err1.response);
           })
         )
-      );
+      );      
 
       const responsesAll = await this.getResponses();
       documents.map((document) => {
@@ -60,10 +61,10 @@ export class ChatbotService {
         }
         return document;
       });
-
-      await this._utteranceService.deleteAll();
-      await this._responseService.deleteAll();
-      await this._documentService.deleteAll();
+      
+      // await this._utteranceService.deleteAll();
+      // await this._responseService.deleteAll();
+      // await this._documentService.deleteAll();
 
       for (let document of documents) {
         const documentJson: CreateDocumentDto = {
@@ -71,6 +72,8 @@ export class ChatbotService {
           estado: 1,
           idChatbot: document.id,
         };
+        console.log(documentJson, 'json....');
+        
         const respDocument = await this._documentService.crearUno(documentJson);
         console.log(respDocument, "create document....");
 
@@ -132,7 +135,36 @@ export class ChatbotService {
   async postDocumentLocal(payload: CreateDocumentDto) {
     try {
       payload.fechaCreacion = format(new Date(), "yyyy-MM-dd HH:mm:ss");
-      return this._documentService.crearUno(payload);
+      console.log(payload, "paylaod.....");
+      const { expression } = payload;
+      const { type, content, action, path, name, alt } = payload;
+
+      const newDocument = await this._documentService.crearUno(payload);
+
+      const jsonUtterance = {
+        utterance: expression,
+        document: newDocument.id,
+      };
+      await this._utteranceService.crearUno(jsonUtterance);
+
+      const jsonResponse: CreateResponseDto = {
+        response: JSON.stringify(
+          this.removeEmptyFields({
+            type,
+            content,
+            action,
+            path,
+            name,
+            alt,
+          })
+        ),
+        document: newDocument.id,
+      };
+      await this._responseService.crearUno(jsonResponse);
+
+      newDocument.responses = 1;
+      newDocument.utterances = 1;
+      return newDocument;
     } catch (err) {
       console.error(
         "Error documentos - No se pudo crear un registr local de documentos",
@@ -148,6 +180,8 @@ export class ChatbotService {
   async putDocumentLocal(id: number, payload: UpdateDocumentDto) {
     try {
       payload.fechaActualizacion = format(new Date(), "yyyy-MM-dd HH:mm:ss");
+      console.log(payload, 'data acutlializar.....');
+      
       return this._documentService.actualizarPorId(id, payload);
     } catch (err) {
       console.error(
@@ -185,7 +219,9 @@ export class ChatbotService {
 
   async postResponseLocal(payload: CreateResponseDto) {
     try {
-      return this._responseService.crearUno(payload);
+      const jsonDocument = {estado: 0};
+      await this._documentService.actualizarPorId(payload.document, jsonDocument);
+      return await this._responseService.crearUno(payload);
     } catch (err) {
       console.error(
         "Error respuesta - No se pudo crear una respuesta local de documentos",
@@ -200,6 +236,9 @@ export class ChatbotService {
 
   async putResponseLocal(id: number, payload: UpdateResponseDto) {
     try {
+      console.log(id,'-- putResponseLocal --', payload);
+      const jsonDocument = {estado: 0};
+      await this._documentService.actualizarPorId(payload.document, jsonDocument);
       return this._responseService.actualizarPorId(id, payload);
     } catch (err) {
       console.error(
@@ -215,6 +254,8 @@ export class ChatbotService {
 
   async getUtterancesLocalById(id: number) {
     try {
+      console.log(id, 'number de ');
+      
       const utterances = await this._utteranceService.buscarTodos({
         relations: [{ name: "document", hijos: [{ key: "id", value: id }] }],
       });
@@ -233,6 +274,8 @@ export class ChatbotService {
 
   async postUtteranceLocal(payload: CreateUtteranceDto) {
     try {
+      const jsonDocument = {estado: 0};
+      await this._documentService.actualizarPorId(payload.document, jsonDocument);
       return this._utteranceService.crearUno(payload);
     } catch (err) {
       console.error(
@@ -248,6 +291,10 @@ export class ChatbotService {
 
   async putUtteranceLocal(id: number, payload: UpdateUtteranceDto) {
     try {
+      const jsonDocument = {estado: 0};
+      console.log(payload, 'paykiad.,,,', id);
+      
+      await this._documentService.actualizarPorId(payload.document, jsonDocument);
       return this._utteranceService.actualizarPorId(id, payload);
     } catch (err) {
       console.error(
@@ -476,5 +523,11 @@ export class ChatbotService {
       Logger.error("_chatbotService.updateResponses(), ocurrio un error");
       this.errorHandlerService.handleCustomError(err.response);
     }
+  }
+
+  removeEmptyFields(obj: any): any {
+    return Object.fromEntries(
+      Object.entries(obj).filter(([_, v]) => v != null && v !== "")
+    );
   }
 }

@@ -26,15 +26,15 @@ import {ENTIDADES_APLICATIVO} from '../common/entidades-aplicativo';
 
                 /** Config del typeorm */
                 const typeorm_config: any = {
-                    type: 'mssql',
+                    type: 'mysql',
+                    // url,
                     host,
                     port,
                     username: user,
                     password: pass,
                     database,
-                    schema,
                     // logging: true,
-                    synchronize: true,
+                    // synchronize: true,
                     entities: ENTIDADES_APLICATIVO,
                     options: {
                         encrypt: true,

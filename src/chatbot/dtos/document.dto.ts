@@ -31,6 +31,34 @@ export class CreateDocumentDto {
   @IsOptional()
   @IsString()
   fechaCreacion?: string;
+
+  @IsOptional()
+  @IsString()
+  readonly expression?: string;
+
+  @IsOptional()
+  @IsString()
+  readonly type?: string;
+
+  @IsOptional()
+  @IsString()
+  readonly content?: string;
+
+  @IsOptional()
+  @IsString()
+  readonly action?: string;
+
+  @IsOptional()
+  @IsString()
+  readonly path?: string;
+
+  @IsOptional()
+  @IsString()
+  readonly name?: string;
+
+  @IsOptional()
+  @IsString()
+  readonly alt?: string;
 }
 
 export class UpdateDocumentDto extends PartialType(CreateDocumentDto) {

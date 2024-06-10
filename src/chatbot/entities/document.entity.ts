@@ -15,7 +15,7 @@ export class DocumentEntity {
   @Column({
     type: "varchar",
     name: "TITLE",
-    length: "MAX",
+    // length: "max_value",
   })
   title?: string;
 
@@ -41,29 +41,29 @@ export class DocumentEntity {
   eliminar? = 1 | 0;
 
   @Column({
-    type: "smalldatetime",
+    type: "date",
     name: "FECHA_CREACION",
     nullable: true,
   })
   fechaCreacion?: string;
 
   @Column({
-    type: "smalldatetime",
+    type: "date",
     name: "FECHA_ACTUALIZACION",
     nullable: true,
   })
   fechaActualizacion?: string;
 
   @Column({
-    type: "smalldatetime",
+    type: "date",
     name: "FECHA_SOLICITUD_ELIMINACION",
     nullable: true,
   })
   fechaSolicitudEliminacion?: string;
 
-  @OneToMany(() => ResponseEntity, (response) => response.document)
+  @OneToMany(() => ResponseEntity, (response) => response.document, { onDelete: 'CASCADE' })
   responses?: ResponseEntity[];
 
-  @OneToMany(() => UtteranceEntity, (utterance) => utterance.document)
+  @OneToMany(() => UtteranceEntity, (utterance) => utterance.document, { onDelete: 'CASCADE' })
   utterances?: UtteranceEntity[];
 }
