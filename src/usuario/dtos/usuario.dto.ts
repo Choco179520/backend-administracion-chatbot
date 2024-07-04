@@ -1,5 +1,6 @@
-import {IsEmail, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString} from "class-validator";
+import {IsAlphanumeric, IsEmail, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString} from "class-validator";
 import {PartialType} from "@nestjs/mapped-types";
+import { EstadoUsuarioEnum } from "../enums/usuario.enum";
 
 export class CreateUsuarioDto {
     @IsOptional()
@@ -16,23 +17,27 @@ export class CreateUsuarioDto {
 
     @IsNotEmpty()
     @IsString()
-    readonly telefono?: string;
+    readonly rol?: string;
 
     @IsOptional()
     @IsString()
-    fechaRegistro?: string;
+    password?: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
-    readonly rol?: string;
+    estado?: EstadoUsuarioEnum;
 }
 
 export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {
     @IsOptional()
     @IsString()
     fechaUltimoAcceso?: string;
-    
+
+    @IsOptional()
+    @IsString()
+    fechaActualizacionPassword?: string;
+
     @IsOptional()
     @IsNumber()
-    readonly estado? = 1 | 0;
+    actualizadoPassword?: 1 | 0
 }

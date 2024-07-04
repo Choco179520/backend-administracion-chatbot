@@ -1,4 +1,4 @@
-import { NestFactory } from "@nestjs/core";
+import { NestFactory, Reflector } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import {
   ExpressAdapter,
@@ -46,7 +46,7 @@ async function bootstrap() {
     })
   );
 
-  //app.use(CapturarPeticion);
+  app.use(CapturarPeticion);
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -54,11 +54,11 @@ async function bootstrap() {
     })
   );
 
-  // const reflector = app.get(Reflector);
-  // app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
+  const reflector = app.get(Reflector);
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
 
   app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Methods", "GET, POST", "PUT");
+    res.header("Access-Control-Allow-Methods", "GET, POST", "PUT", "DELETE");
     res.header("Access-Control-Allow-Headers", "Content-Type");
     next();
   });
@@ -76,18 +76,16 @@ async function bootstrap() {
     )
     .setVersion("1.0")
     .build();
-  
+
   const documentApi = SwaggerModule.createDocument(app, configSwagger);
-  SwaggerModule.setup("api-backoffice-chatbot/documentacion", app, documentApi);
+  SwaggerModule.setup("documentacion", app, documentApi);
 
   /** Registra el interceptor para encriptar las respuestas **/
-  // app.useGlobalInterceptors(new EncryptInterceptor());
+  app.useGlobalInterceptors(new EncryptInterceptor());
   const serverHttps = https.createServer(httpsOptions, server);
 
   await app.init();
   serverHttps.listen(process.env.PORT || 3000);
-  // await app.listen(process.env.PORT ||3001);
-  // console.log(app)
   logger.debug(
     `Aplicación de backoffice administracion CHATBOT EPN esta corriendo en el puerto: ${serverHttps.address()["port"]}`
   );

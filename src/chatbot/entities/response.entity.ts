@@ -22,7 +22,6 @@ export class ResponseEntity {
   @Column({
     type: "text",
     name: "RESPONSE",
-    // length: "max_value",
   })
   response?: string;
 

@@ -23,7 +23,7 @@ import { CreateUsuarioDto, UpdateUsuarioDto } from "../dtos/usuario.dto";
 import { FilterDto } from "src/common/enums/filter.dto";
 
 @ApiTags("Usuario")
-// @UseGuards(ProtegerControllerGuard, RolesGuard)
+@UseGuards(ProtegerControllerGuard, RolesGuard)
 @Controller("usuario")
 export class UsuarioController {
   constructor(private readonly _usuarioService: UsuarioService) {}
@@ -79,6 +79,8 @@ export class UsuarioController {
     @Param("id") id: number,
     @Body() payload: UpdateUsuarioDto
   ) {
+    console.log(payload, 'actualizar....');
+    
     return await this._usuarioService.actualizarPorId(id, payload);
   }
 

@@ -8,7 +8,7 @@ import {
   Put,
   UseGuards,
 } from "@nestjs/common";
-import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import {
   Roles,
   AdminAccess,
@@ -23,7 +23,7 @@ import { CreateResponseDto, UpdateResponseDto } from "../dtos/response.dto";
 import { CreateUtteranceDto, UpdateUtteranceDto } from "../dtos/utterance.dto";
 
 @ApiTags("Chatbot")
-// @UseGuards(ProtegerControllerGuard, RolesGuard)
+@UseGuards(ProtegerControllerGuard, RolesGuard)
 @Roles("ADMIN")
 @AdminAccess()
 @Controller("chatbot")
@@ -33,12 +33,33 @@ export class ChatbotController {
   @ApiOperation({
     description: "Sincronizar documentos desde la base de datos del chatbot",
   })
+  @ApiBody({
+    type: Object,
+    description:
+      "Solicitud para sincronizar la información desde la base de datos del chatbot a la base local",
+    examples: {
+      synchronize_documents: {
+        description: "Sincronizar información de cuenta para transferencia",
+        value: "",
+      },
+    },
+  })
   @Get("synchronize-documents")
   synchronizeDocuments() {
     // return this._chatbotService.synchronizeDocuments();
   }
 
   @ApiOperation({ description: "Obtener lista de documento local" })
+  @ApiBody({
+    type: Object,
+    description: "Obtener lista de documento local",
+    examples: {
+      get_documents: {
+        description: "Listar los documentos almacenados en base de datos",
+        value: "",
+      },
+    },
+  })
   @Get("documents")
   getDocuments() {
     return this._chatbotService.getDocumentsLocal();
@@ -112,8 +133,8 @@ export class ChatbotController {
   @ApiOperation({
     description: "Obtener lista de respuestas por documento local",
   })
-  @Post("update-chatbot")
-  postChatbot(@Body() payload: any) {
-    // return this._chatbotService.getResponsesById(payload.id);
+  @Get("update-chatbot")
+  getChatbot(@Body() payload: any) {
+    return this._chatbotService.getChatbot();
   }
 }

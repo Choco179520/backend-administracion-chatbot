@@ -19,7 +19,6 @@ export class UtteranceEntity {
   @Column({
     type: "varchar",
     name: "UTTERANCE",
-    // length: "MAX",
   })
   utterance?: string;
 

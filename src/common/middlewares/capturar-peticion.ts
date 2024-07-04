@@ -24,7 +24,7 @@ export function CapturarPeticion(req: any, res: any, next: NextFunction) {
 export class EncryptInterceptor implements NestInterceptor {
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
         return next.handle().pipe(
-            map((data) => {
+            map((data) => {                
                 // Si data es un Error, devolvemos una respuesta encriptada con información de error
                 if (data instanceof Error) {
                     throw new NotFoundException({
@@ -33,17 +33,19 @@ export class EncryptInterceptor implements NestInterceptor {
                 }
 
                 // Si data no es un Error, devolvemos una respuesta encriptada con los datos
+                console.log(data, 'data respuesta...');
+                
                 return {d: cifrarInformacionResponse(JSON.stringify(data))};
             }),
-            // catchError((error) => {
-            //     // Si ocurre un error durante el flujo del observable, manejamos el error aquí
-            //     // Devolvemos una respuesta encriptada con información de error
-            //     return throwError({
-            //         d: cifrarInformacionResponse(
-            //             JSON.stringify(error.response.message)
-            //         ),
-            //     });
-            // })
+            catchError((error) => {
+                // Si ocurre un error durante el flujo del observable, manejamos el error aquí
+                // Devolvemos una respuesta encriptada con información de error
+                return throwError({
+                    d: cifrarInformacionResponse(
+                        JSON.stringify(error.response.message)
+                    ),
+                });
+            })
         );
     }
 }

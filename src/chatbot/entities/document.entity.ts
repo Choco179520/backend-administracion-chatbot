@@ -15,7 +15,6 @@ export class DocumentEntity {
   @Column({
     type: "varchar",
     name: "TITLE",
-    // length: "max_value",
   })
   title?: string;
 

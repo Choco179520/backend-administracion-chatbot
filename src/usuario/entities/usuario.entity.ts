@@ -1,67 +1,96 @@
 import {
-    Column,
-    Entity,
-    PrimaryGeneratedColumn,
-} from 'typeorm';
-import {Exclude} from "class-transformer";
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
+import { EstadoUsuarioEnum, RolesUsuarioEnum } from "../enums/usuario.enum";
+import { Exclude } from "class-transformer";
 
-@Entity('USUARIO')
+@Entity("USUARIO")
 export class UsuarioEntity {
-    @PrimaryGeneratedColumn({
-        type: 'int',
-        name: 'ID_USUARIO',
-        primaryKeyConstraintName: 'PK_USUARIO',
-    })
-    id?: number;
+  @PrimaryGeneratedColumn({
+    type: "int",
+    name: "ID_USUARIO",
+    primaryKeyConstraintName: "PK_USUARIO",
+  })
+  id?: number;
 
-    @Column({
-        type: 'varchar',
-        name: 'NOMBRE',
-        length: 100,
-    })
-    nombre?: string;
+  @CreateDateColumn()
+  created_at: Date; // Creation date
 
-    @Column({
-        type: 'varchar',
-        name: 'ROL',
-        length: 20
-    })
-    rol?: string;
+  @UpdateDateColumn()
+  updated_at: Date; // Last updated date
 
-    @Column({
-        type: 'varchar',
-        name: 'EMAIL',
-        length: 80,
-        unique: true
-    })
-    email?: string;
+  @Column({
+    type: "varchar",
+    name: "NOMBRE",
+    length: 100,
+  })
+  nombre?: string;
 
-    @Column({
-        type: 'varchar',
-        name: 'TELEFONO',
-        length: 10,
-    })
-    telefono?: string;
+  @Column({
+    type: "varchar",
+    name: "ROL",
+    length: 20,
+  })
+  rol?: RolesUsuarioEnum;
 
-    @Column({
-        type: 'date',
-        name: 'FECHA_ULTIMO_ACCESO',
-        nullable: true
-    })
-    fechaUltimoAcceso?: string;
+  @Column({
+    type: "varchar",
+    name: "EMAIL",
+    length: 80,
+    unique: true,
+  })
+  email?: string;
 
-    @Exclude()
-    @Column({
-        type: 'date',
-        name: 'FECHA_REGISTRO',
-    })
-    fechaRegistro?: string;
+  @Exclude()
+  @Column({
+    type: "varchar",
+    name: "PASSWORD",
+  })
+  password?: string;
 
-    @Column({
-        type: 'tinyint',
-        name: 'ESTADO',
-        default: 1,
-    })
-    estado? = 1 | 0;
+  @Column({
+    type: "date",
+    name: "FECHA_ULTIMO_ACCESO",
+    nullable: true,
+  })
+  fechaUltimoAcceso?: string;
 
+  @Column({
+    type: "tinyint",
+    name: "ACTUALIZO_PASSWORD",
+    default: 0,
+  })
+  actualizadoPassword? = 1 | 0;
+
+  @Column({
+    type: "date",
+    name: "FECHA_ACT_PASSWORD",
+    nullable: true,
+  })
+  fechaActualizacionPassword?: string;
+
+  @Column({
+    type: "text",
+    name: "ESTADO",
+    nullable: true,
+  })
+  estado? = EstadoUsuarioEnum;
+
+  @Column({
+    type: "text",
+    name: "JWT_AZURE",
+    nullable: true,
+  })
+  jwtAzure?: string;
+
+  @Column({
+    type: "text",
+    name: "JWT",
+    nullable: true,
+  })
+  jwt?: string;
 }

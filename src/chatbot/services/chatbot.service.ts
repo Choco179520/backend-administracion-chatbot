@@ -61,9 +61,9 @@ export class ChatbotService {
         return document;
       });
       
-      // await this._utteranceService.deleteAll();
-      // await this._responseService.deleteAll();
-      // await this._documentService.deleteAll();
+      await this._utteranceService.deleteAll();
+      await this._responseService.deleteAll();
+      await this._documentService.deleteAll();
 
       for (let document of documents) {
         const documentJson: CreateDocumentDto = {
@@ -521,6 +521,57 @@ export class ChatbotService {
         }
       );
       Logger.error("_chatbotService.updateResponses(), ocurrio un error");
+      this.errorHandlerService.handleCustomError(err.response);
+    }
+  }
+
+  /** Manejar base local y chatbot */
+  async getChatbot() {
+    try {
+      const pathGetDocuments = this.url + `/documents`;
+      let documents = await firstValueFrom(
+        this._httpService.get(pathGetDocuments).pipe(
+          map((response) => {
+            if (response.status == 200) {
+              return response.data;
+            }
+          }),
+          catchError((err1) => {
+            throw this.errorHandlerService.handleCustomError(err1.response);
+          })
+        )
+      );
+  
+      const responsesAll = await this.getResponses();
+      documents.map((document) => {
+        const responseD = responsesAll.find(
+          (resp) => resp.id == document.response_set_id
+        );      
+        if (responseD) {
+          document.responses = [...responseD.responses];
+          document.utterances = document.utterances;
+        }
+        return document;
+      });   
+      
+      const json = {
+        where: [
+          {estado: 0},
+          {eliminar: 1},
+        ],
+        relations: ['responses', 'utterances']
+      }
+      const registros = await this._documentService.buscarPorParametros(json, 'many');
+      
+      return registros;
+    } catch (err) {
+      console.error(
+        "Error obtener documentos - No se pudo obtener la lista de documentos",
+        {
+          error: err.response,
+        }
+      );
+      Logger.error("_chatbotService.getChatbot(), ocurrio un error");
       this.errorHandlerService.handleCustomError(err.response);
     }
   }
