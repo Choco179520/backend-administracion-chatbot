@@ -12,6 +12,7 @@ import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import {
   Roles,
   AdminAccess,
+  PublicAccess,
 } from "src/common/decorators/decoradores-aplicativo.decorators";
 import { ChatbotService } from "../services/chatbot.service";
 import { ConfigType } from "@nestjs/config";
@@ -23,8 +24,6 @@ import { CreateResponseDto, UpdateResponseDto } from "../dtos/response.dto";
 import { CreateUtteranceDto, UpdateUtteranceDto } from "../dtos/utterance.dto";
 
 @ApiTags("Chatbot")
-@UseGuards(ProtegerControllerGuard, RolesGuard)
-@Roles("ADMIN")
 @AdminAccess()
 @Controller("chatbot")
 export class ChatbotController {
@@ -44,6 +43,7 @@ export class ChatbotController {
       },
     },
   })
+  @UseGuards(ProtegerControllerGuard, RolesGuard)
   @Get("synchronize-documents")
   synchronizeDocuments() {
     // return this._chatbotService.synchronizeDocuments();
@@ -87,12 +87,9 @@ export class ChatbotController {
   }
 
   @ApiOperation({ description: "Crear expresiones por documento por id" })
-  @Post("utterances/:id")
-  postUtterancesLocalById(
-    @Param() params: any,
-    @Body() payload: CreateUtteranceDto
-  ) {
-    console.log(payload, "data paylaod crear utterances"), params;
+  @Post("utterances")
+  postUtterancesLocalById(@Body() payload: CreateUtteranceDto) {
+    console.log(payload, "data paylaod crear utterances");
     return this._chatbotService.postUtteranceLocal(payload);
   }
 
@@ -125,7 +122,7 @@ export class ChatbotController {
     @Param() params: any,
     @Body() payload: UpdateResponseDto
   ) {
-    console.log(payload, "data paylaod acualizar responses", params);
+    // console.log(payload, "data paylaod acualizar responses", params);
     return this._chatbotService.putResponseLocal(+params.id, payload);
   }
 

@@ -181,15 +181,47 @@ export class PrincipalService<Entity, CreateDto, UpdateDto> {
   async deleteAll() {
     try {
       const nameData = this.nameEntity.split("Entity")[0].toUpperCase();
-      const resetQuery = `DBCC CHECKIDENT ('EPN.ADMINISTRACION_CHATBOT.${nameData}', RESEED, 0)`;
+      const resetQuery = `TRUNCATE TABLE ${nameData}`;
       await this._repository.query(resetQuery);
 
-      const deleteRecord = await this._repository
+      const truncate = await this._repository
         .createQueryBuilder()
         .delete()
         .from(this.nameEntity)
         .execute();
-      return deleteRecord;
+      return truncate;
+    } catch (err) {
+      throw ErrorManager.createSignatureError(err.message);
+    }
+  }
+
+  async deleteFather() {
+    try {
+      const desabledQuery = `SET FOREIGN_KEY_CHECKS = 0`;
+      await this._repository.query(desabledQuery);
+
+      await this._repository
+        .createQueryBuilder()
+        .delete()
+        .from('UTTERANCE')
+        .execute();
+
+      await this._repository
+        .createQueryBuilder()
+        .delete()
+        .from('RESPONSE')
+        .execute();
+
+      const truncate = await this._repository
+        .createQueryBuilder()
+        .delete()
+        .from('DOCUMENT')
+        .execute();
+
+      const enabledQuery = `SET FOREIGN_KEY_CHECKS = 1`;
+      await this._repository.query(enabledQuery);
+
+      return truncate;
     } catch (err) {
       throw ErrorManager.createSignatureError(err.message);
     }

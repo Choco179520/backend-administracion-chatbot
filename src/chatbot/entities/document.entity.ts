@@ -20,10 +20,17 @@ export class DocumentEntity {
 
   @Column({
     type: "int",
-    name: "ID_CHATBOT",
+    name: "ID_CHATBOT_DOCUMENTS",
     nullable: true
   })
-  idChatbot?: number;
+  idChatbotDocuments?: number;
+
+  @Column({
+    type: "int",
+    name: "ID_CHATBOT_RESPONSE",
+    nullable: true
+  })
+  idChatbotResponse?: number;
 
   @Column({
     type: "tinyint",

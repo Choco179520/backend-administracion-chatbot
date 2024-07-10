@@ -24,14 +24,24 @@ export class CreateDocumentDto {
   readonly title?: string;
 
   @ApiProperty({
-    description: "idChatbot",
+    description: "idChatbotDocuments",
     example: 1,
     type: Number,
     required: false
   })
   @IsOptional()
   @IsInt()
-  readonly idChatbot?: number;
+  readonly idChatbotDocuments?: number;
+
+  @ApiProperty({
+    description: "idChatbotResponse",
+    example: 1,
+    type: Number,
+    required: false
+  })
+  @IsOptional()
+  @IsInt()
+  readonly idChatbotResponse?: number;
 
   @ApiProperty({
     description: "estado",

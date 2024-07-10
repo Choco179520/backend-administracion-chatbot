@@ -47,7 +47,7 @@ export class ChatbotService {
             throw this.errorHandlerService.handleCustomError(err1.response);
           })
         )
-      );      
+      );
 
       const responsesAll = await this.getResponses();
       documents.map((document) => {
@@ -60,21 +60,20 @@ export class ChatbotService {
         }
         return document;
       });
-      
-      await this._utteranceService.deleteAll();
-      await this._responseService.deleteAll();
-      await this._documentService.deleteAll();
+
+      await this._documentService.deleteFather();
 
       for (let document of documents) {
+        console.log(document, 'document sincronice');
+        
         const documentJson: CreateDocumentDto = {
           title: document.title,
           estado: 1,
-          idChatbot: document.id,
+          idChatbotResponse: document.response_set_id,
+          idChatbotDocuments: document.id
         };
-        console.log(documentJson, 'json....');
-        
+
         const respDocument = await this._documentService.crearUno(documentJson);
-        console.log(respDocument, "create document....");
 
         for (let utterance of document.utterances) {
           const utteranceJson: CreateUtteranceDto = {
@@ -143,6 +142,7 @@ export class ChatbotService {
       const jsonUtterance = {
         utterance: expression,
         document: newDocument.id,
+        estado: 0
       };
       await this._utteranceService.crearUno(jsonUtterance);
 
@@ -158,6 +158,7 @@ export class ChatbotService {
           })
         ),
         document: newDocument.id,
+        estado: 0
       };
       await this._responseService.crearUno(jsonResponse);
 
@@ -179,8 +180,8 @@ export class ChatbotService {
   async putDocumentLocal(id: number, payload: UpdateDocumentDto) {
     try {
       payload.fechaActualizacion = format(new Date(), "yyyy-MM-dd HH:mm:ss");
-      console.log(payload, 'data acutlializar.....');
-      
+      console.log(payload, "data acutlializar.....");
+
       return this._documentService.actualizarPorId(id, payload);
     } catch (err) {
       console.error(
@@ -218,8 +219,11 @@ export class ChatbotService {
 
   async postResponseLocal(payload: CreateResponseDto) {
     try {
-      const jsonDocument = {estado: 0};
-      await this._documentService.actualizarPorId(payload.document, jsonDocument);
+      const jsonDocument = { estado: 0 };
+      await this._documentService.actualizarPorId(
+        payload.document,
+        jsonDocument
+      );
       return await this._responseService.crearUno(payload);
     } catch (err) {
       console.error(
@@ -235,10 +239,13 @@ export class ChatbotService {
 
   async putResponseLocal(id: number, payload: UpdateResponseDto) {
     try {
-      console.log(id,'-- putResponseLocal --', payload);
-      const jsonDocument = {estado: 0};
-      const act = await this._documentService.actualizarPorId(+payload.document, jsonDocument);
-      console.log(act, 'update...', +payload.document);
+      // console.log(id,'-- putResponseLocal --', payload);
+      const jsonDocument = { estado: 0 };
+      const act = await this._documentService.actualizarPorId(
+        +payload.document,
+        jsonDocument
+      );
+      // console.log(act, 'update...', +payload.document);
       return this._responseService.actualizarPorId(id, payload);
     } catch (err) {
       console.error(
@@ -254,8 +261,6 @@ export class ChatbotService {
 
   async getUtterancesLocalById(id: number) {
     try {
-      console.log(id, 'number de ');
-      
       const utterances = await this._utteranceService.buscarTodos({
         relations: [{ name: "document", hijos: [{ key: "id", value: id }] }],
       });
@@ -274,8 +279,11 @@ export class ChatbotService {
 
   async postUtteranceLocal(payload: CreateUtteranceDto) {
     try {
-      const jsonDocument = {estado: 0};
-      await this._documentService.actualizarPorId(payload.document, jsonDocument);
+      const jsonDocument = { estado: 0 };
+      await this._documentService.actualizarPorId(
+        payload.document,
+        jsonDocument
+      );
       return this._utteranceService.crearUno(payload);
     } catch (err) {
       console.error(
@@ -291,10 +299,13 @@ export class ChatbotService {
 
   async putUtteranceLocal(id: number, payload: UpdateUtteranceDto) {
     try {
-      const jsonDocument = {estado: 0};
-      console.log(payload, 'paykiad.,,,', id);
-      
-      await this._documentService.actualizarPorId(payload.document, jsonDocument);
+      const jsonDocument = { estado: 0 };
+      console.log(payload, "paykiad.,,,", id);
+
+      await this._documentService.actualizarPorId(
+        payload.document,
+        jsonDocument
+      );
       return this._utteranceService.actualizarPorId(id, payload);
     } catch (err) {
       console.error(
@@ -309,6 +320,38 @@ export class ChatbotService {
   }
 
   /** Servicios para manejar el chatbot */
+  async postDocument(data) {
+    try {
+      let documents;
+      const pathPostDocuments = this.url + `/documents`;
+
+      Logger.verbose(`Post documents....`);
+
+      documents = await firstValueFrom(
+        this._httpService.post(pathPostDocuments, data).pipe(
+          map((response) => {
+            if (response.status == 201) {
+              return response.data;
+            }
+          }),
+          catchError((err1) => {
+            throw this.errorHandlerService.handleCustomError(err1.response);
+          })
+        )
+      );
+      return documents;
+    } catch (err) {
+      console.error(
+        "Error obtener documentos - No se pudo obtener la lista de documentos",
+        {
+          error: err.response,
+        }
+      );
+      Logger.error("_chatbotService.getDocuments(), ocurrio un error");
+      this.errorHandlerService.handleCustomError(err.response);
+    }
+  }
+
   async getDocuments() {
     try {
       let documents;
@@ -397,6 +440,100 @@ export class ChatbotService {
     }
   }
 
+  async putDocuments(id: number, data: any) {
+    try {
+      let documents;
+      const pathGetResponses = this.url + `/documents/${id}`;
+
+      Logger.verbose(`updateDocuments....`);
+
+      documents = await firstValueFrom(
+        this._httpService.put(pathGetResponses, data).pipe(
+          map((response) => {
+            if (response.status == 200) {
+              return response.data;
+            }
+          }),
+          catchError((err1) => {
+            throw this.errorHandlerService.handleCustomError(err1.response);
+          })
+        )
+      );
+      return documents;
+    } catch (err) {
+      console.error(
+        "Error obtener documentos - No se pudo obtener la lista de documentos",
+        {
+          error: err.response,
+        }
+      );
+      Logger.error("_chatbotService.updateDocuments(), ocurrio un error");
+      this.errorHandlerService.handleCustomError(err.response);
+    }
+  }
+
+  async deleteDocuments(id: number) {
+    try {
+      let documents;
+      const pathGetResponses = this.url + `/documents/${id}`;
+
+      Logger.verbose(`deleteDocuments....`);
+
+      documents = await firstValueFrom(
+        this._httpService.delete(pathGetResponses).pipe(
+          map((response) => {
+            if (response.status == 200) {
+              return response.data;
+            }
+          }),
+          catchError((err1) => {
+            throw this.errorHandlerService.handleCustomError(err1.response);
+          })
+        )
+      );
+      return documents;
+    } catch (err) {
+      console.error(
+        "Error eliminar documentos - No se pudo eliminar la lista de documentos",
+        {
+          error: err.response,
+        }
+      );
+      Logger.error("_chatbotService.deleteDocuments(), ocurrio un error");
+      this.errorHandlerService.handleCustomError(err.response);
+    }
+  }
+
+  async postResponse(data: any) {
+    try {
+      let responses;
+      const pathPostResponse = this.url + `/response-sets`;
+      Logger.verbose(`Post responses....`);
+      responses = await firstValueFrom(
+        this._httpService.post(pathPostResponse, data).pipe(
+          map((response) => {
+            if (response.status == 201) {
+              return response.data;
+            }
+          }),
+          catchError((err1) => {
+            throw this.errorHandlerService.handleCustomError(err1.response);
+          })
+        )
+      );
+      return responses;
+    } catch (err) {
+      console.error(
+        "Error obtener documentos - No se pudo obtener la lista de documentos",
+        {
+          error: err.response,
+        }
+      );
+      Logger.error("_chatbotService.getDocuments(), ocurrio un error");
+      this.errorHandlerService.handleCustomError(err.response);
+    }
+  }
+
   async getResponses() {
     try {
       let responses;
@@ -429,71 +566,7 @@ export class ChatbotService {
     }
   }
 
-  async postDocument(data) {
-    try {
-      let documents;
-      const pathPostDocuments = this.url + `/documents`;
-
-      Logger.verbose(`Post documents....`);
-
-      documents = await firstValueFrom(
-        this._httpService.post(pathPostDocuments).pipe(
-          map((response) => {
-            if (response.status == 200) {
-              return response.data;
-            }
-          }),
-          catchError((err1) => {
-            throw this.errorHandlerService.handleCustomError(err1.response);
-          })
-        )
-      );
-      return documents;
-    } catch (err) {
-      console.error(
-        "Error obtener documentos - No se pudo obtener la lista de documentos",
-        {
-          error: err.response,
-        }
-      );
-      Logger.error("_chatbotService.getDocuments(), ocurrio un error");
-      this.errorHandlerService.handleCustomError(err.response);
-    }
-  }
-
-  async updateDocuments(id: number, data: any) {
-    try {
-      let documents;
-      const pathGetResponses = this.url + `/documents/${id}`;
-
-      Logger.verbose(`updateDocuments....`);
-
-      documents = await firstValueFrom(
-        this._httpService.put(pathGetResponses, data).pipe(
-          map((response) => {
-            if (response.status == 200) {
-              return response.data;
-            }
-          }),
-          catchError((err1) => {
-            throw this.errorHandlerService.handleCustomError(err1.response);
-          })
-        )
-      );
-      return documents;
-    } catch (err) {
-      console.error(
-        "Error obtener documentos - No se pudo obtener la lista de documentos",
-        {
-          error: err.response,
-        }
-      );
-      Logger.error("_chatbotService.updateDocuments(), ocurrio un error");
-      this.errorHandlerService.handleCustomError(err.response);
-    }
-  }
-
-  async updateResponses(id: number, data: any) {
+  async putResponses(id: number, data: any) {
     try {
       let responses;
       const pathGetResponses = this.url + `/response-sets/${id}`;
@@ -525,12 +598,15 @@ export class ChatbotService {
     }
   }
 
-  /** Manejar base local y chatbot */
-  async getChatbot() {
+  async deleteResponses(id: number) {
     try {
-      const pathGetDocuments = this.url + `/documents`;
-      let documents = await firstValueFrom(
-        this._httpService.get(pathGetDocuments).pipe(
+      let responses;
+      const pathGetResponses = this.url + `/response-sets/${id}`;
+
+      Logger.verbose(`deleteResponses....`);
+
+      responses = await firstValueFrom(
+        this._httpService.delete(pathGetResponses).pipe(
           map((response) => {
             if (response.status == 200) {
               return response.data;
@@ -541,29 +617,84 @@ export class ChatbotService {
           })
         )
       );
-  
-      const responsesAll = await this.getResponses();
-      documents.map((document) => {
-        const responseD = responsesAll.find(
-          (resp) => resp.id == document.response_set_id
-        );      
-        if (responseD) {
-          document.responses = [...responseD.responses];
-          document.utterances = document.utterances;
+      return responses;
+    } catch (err) {
+      console.error(
+        "Error eliminar response - No se pudo eliminar la lista de documentos",
+        {
+          error: err.response,
         }
-        return document;
-      });   
-      
+      );
+      Logger.error("_chatbotService.deleteResponses(), ocurrio un error");
+      this.errorHandlerService.handleCustomError(err.response);
+    }
+  }
+
+  /** Manejar base local y chatbot */
+  async getChatbot() {
+    try {
       const json = {
-        where: [
-          {estado: 0},
-          {eliminar: 1},
-        ],
-        relations: ['responses', 'utterances']
+        where: [{ estado: 0 }, { eliminar: 1 }],
+        relations: ["responses", "utterances"],
+      };
+      const registros = await this._documentService.buscarPorParametros(
+        json,
+        "many"
+      );
+
+      if (registros) {
+        for (let reg of registros) {
+          if (reg.eliminar == 1 && reg.estado == 1) {
+            const eliminar = await this.deleteResponses(reg.idChatbotResponse)
+          } else if (reg.idChatbot) {
+            let respuestas = [];
+            let expresiones = [];
+
+            for (let resp of reg.responses) {
+              respuestas.push(JSON.parse(resp.response));
+            }
+            const respResponses = await this.putResponses(+reg.idChatbot, {
+              responses: respuestas,
+            });
+
+            for (let ute of reg.utterances) {
+              expresiones.push(ute.utterance);
+            }
+
+            const jsonDoc = {
+              utterances: expresiones,
+            };
+
+            await this.putDocuments(+reg.idChatbot, jsonDoc);
+          } else {
+            let respuestas = [];
+            let expresiones = [];
+
+            for (let resp of reg.responses) {
+              respuestas.push(JSON.parse(resp.response));
+            }
+            const respResponses = await this.postResponse({
+              responses: respuestas,
+            });
+
+            for (let ute of reg.utterances) {
+              expresiones.push(ute.utterance);
+            }
+
+            const jsonDoc = {
+              utterances: expresiones,
+              title: reg.title,
+              response_set_id: respResponses.id,
+            };
+
+            await this.postDocument(jsonDoc);
+          }
+        }
       }
-      const registros = await this._documentService.buscarPorParametros(json, 'many');
-      
-      return registros;
+
+      await this.synchronizeDocuments();
+      const respRegistros = await this.getDocumentsLocal();
+      return { respRegistros };
     } catch (err) {
       console.error(
         "Error obtener documentos - No se pudo obtener la lista de documentos",

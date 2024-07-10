@@ -40,7 +40,7 @@ export class AuthController {
     );
   }
 
-  @ApiOperation({ description: "Iniciar sesión de usuario" })
+  @ApiOperation({ description: "Cambiar contraseña de usuario" })
   @PublicAccess()
   @Post("cambiar-contrasenia")
   async cambiarContrasenia(@Body() payload: ResetPasswordDto) {

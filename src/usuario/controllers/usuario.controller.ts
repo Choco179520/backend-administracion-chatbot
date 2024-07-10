@@ -33,10 +33,6 @@ export class UsuarioController {
     status: 201,
     description: "Se a creado exitosamente el registro.",
   })
-  @ApiResponse({
-    status: 400,
-    description: "BAD_REQUEST :: No se encontraron registros.",
-  })
   @Roles("ADMIN")
   @AdminAccess()
   @Post("create")
