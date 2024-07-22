@@ -51,7 +51,7 @@ export class UsuarioService extends PrincipalService<
   }
 
   async validarUsuario(email: string, password: string) {
-    try {
+    try {      
       const usuarioConsulta = await this.buscarPorParametros(
         {
           where: {
@@ -65,6 +65,8 @@ export class UsuarioService extends PrincipalService<
         "one"
       );
 
+      console.log(usuarioConsulta, 'consulta...');
+      
       if (!usuarioConsulta) {
         throw new ErrorManager({
           type: "BAD_REQUEST",

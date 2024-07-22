@@ -64,13 +64,11 @@ export class ChatbotService {
       await this._documentService.deleteFather();
 
       for (let document of documents) {
-        console.log(document, 'document sincronice');
-        
         const documentJson: CreateDocumentDto = {
           title: document.title,
           estado: 1,
           idChatbotResponse: document.response_set_id,
-          idChatbotDocuments: document.id
+          idChatbotDocuments: document.id,
         };
 
         const respDocument = await this._documentService.crearUno(documentJson);
@@ -142,7 +140,7 @@ export class ChatbotService {
       const jsonUtterance = {
         utterance: expression,
         document: newDocument.id,
-        estado: 0
+        estado: 0,
       };
       await this._utteranceService.crearUno(jsonUtterance);
 
@@ -158,7 +156,7 @@ export class ChatbotService {
           })
         ),
         document: newDocument.id,
-        estado: 0
+        estado: 0,
       };
       await this._responseService.crearUno(jsonResponse);
 
@@ -300,8 +298,6 @@ export class ChatbotService {
   async putUtteranceLocal(id: number, payload: UpdateUtteranceDto) {
     try {
       const jsonDocument = { estado: 0 };
-      console.log(payload, "paykiad.,,,", id);
-
       await this._documentService.actualizarPorId(
         payload.document,
         jsonDocument
@@ -645,17 +641,22 @@ export class ChatbotService {
       if (registros) {
         for (let reg of registros) {
           if (reg.eliminar == 1 && reg.estado == 1) {
-            const eliminar = await this.deleteResponses(reg.idChatbotResponse)
-          } else if (reg.idChatbot) {
+            Logger.verbose("Eliminar registro chatbot");
+            const eliminar = await this.deleteResponses(reg.idChatbotResponse);
+          } else if (reg.idChatbotResponse) {
+            Logger.verbose("Actualizar registro chatbot");
             let respuestas = [];
             let expresiones = [];
 
             for (let resp of reg.responses) {
               respuestas.push(JSON.parse(resp.response));
             }
-            const respResponses = await this.putResponses(+reg.idChatbot, {
-              responses: respuestas,
-            });
+            const respResponses = await this.putResponses(
+              +reg.idChatbotResponse,
+              {
+                responses: respuestas,
+              }
+            );
 
             for (let ute of reg.utterances) {
               expresiones.push(ute.utterance);
@@ -664,9 +665,9 @@ export class ChatbotService {
             const jsonDoc = {
               utterances: expresiones,
             };
-
-            await this.putDocuments(+reg.idChatbot, jsonDoc);
+            await this.putDocuments(+reg.idChatbotDocuments, jsonDoc);
           } else {
+            Logger.verbose("Nuevo registro chatbot");
             let respuestas = [];
             let expresiones = [];
 
@@ -686,15 +687,16 @@ export class ChatbotService {
               title: reg.title,
               response_set_id: respResponses.id,
             };
-
             await this.postDocument(jsonDoc);
           }
         }
       }
 
       await this.synchronizeDocuments();
-      const respRegistros = await this.getDocumentsLocal();
-      return { respRegistros };
+      setTimeout(async () => {
+        const respRegistros = await this.getDocumentsLocal();
+        return { registros, respRegistros };
+      }, 10000);
     } catch (err) {
       console.error(
         "Error obtener documentos - No se pudo obtener la lista de documentos",

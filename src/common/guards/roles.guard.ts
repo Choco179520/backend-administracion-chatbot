@@ -27,10 +27,7 @@ export class RolesGuard implements CanActivate {
     const esPublico = this._reflector.get<boolean>(
         PUBLIC_KEY,
         context.getHandler()
-    )
-
-    console.log(esPublico, 'espublico..');
-    
+    )    
 
     if (esPublico) {
       return true
@@ -48,7 +45,6 @@ export class RolesGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();    
     const {rolUsuario, id} = request;
-    console.log(rolUsuario, id);
     
     if (roles == undefined) {
       if (!admin) {

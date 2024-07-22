@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus } from "@nestjs/common";
 
 export class ErrorManager extends Error {
   constructor({
@@ -12,7 +12,7 @@ export class ErrorManager extends Error {
   }
 
   public static createSignatureError(message: string) {
-    const name = message.split(' :: ')[0];
+    const name = message.split(" :: ")[0];
 
     if (name) {
       throw new HttpException(message, HttpStatus.BAD_REQUEST);
@@ -21,8 +21,3 @@ export class ErrorManager extends Error {
     }
   }
 }
-
-export const MENSAJES_RESPUESTA = Object.freeze({
-  ERROR: 'ko',
-  EXITO: 'ok',
-});

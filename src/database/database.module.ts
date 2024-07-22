@@ -34,7 +34,7 @@ import {ENTIDADES_APLICATIVO} from '../common/entidades-aplicativo';
                     password: pass,
                     database,
                     // logging: true,
-                    // synchronize: true,
+                    synchronize: true,
                     entities: ENTIDADES_APLICATIVO,
                     options: {
                         encrypt: true,
