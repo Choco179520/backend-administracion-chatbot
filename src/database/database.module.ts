@@ -36,13 +36,13 @@ import {ENTIDADES_APLICATIVO} from '../common/entidades-aplicativo';
                     // logging: true,
                     // synchronize: synchronize,
                     entities: ENTIDADES_APLICATIVO,
-                    options: {
-                        encrypt: true,
-                        enableArithAbort: true,
-                    },
-                    extra: {
-                        trustServerCertificate: true,
-                    },
+                    // options: {
+                    //     encrypt: true,
+                    //     enableArithAbort: true,
+                    // },
+                    // extra: {
+                    //     trustServerCertificate: true,
+                    // },
                     requestTimeout: 300000,
                 };
                 return typeorm_config;
