@@ -21,6 +21,11 @@ import {
 import * as fs from "fs";
 import * as https from "https";
 
+const httpsOptions = {
+  pfx: fs.readFileSync(join(__dirname, "certificates", "servidor.pfx")),
+  passphrase: "servidor2023",
+};
+
 async function bootstrap() {
   const server = express();
   const logger = new Logger("Server");
@@ -29,7 +34,6 @@ async function bootstrap() {
     AppModule,
     new ExpressAdapter(server)
   );
-  
   app.setGlobalPrefix("api-backoffice-chatbot");
 
   app.use(bodyParser.json({ limit: "50mb" }));
@@ -78,11 +82,12 @@ async function bootstrap() {
 
   /** Registra el interceptor para encriptar las respuestas **/
   app.useGlobalInterceptors(new EncryptInterceptor());
-  const port = process.env.PORT || 3000;
-  await app.listen(port);
-  await app.init();
+  const serverHttps = https.createServer(httpsOptions, server);
 
-  logger.log(`App running in ${await app.getUrl()}/api`);
-  logger.log(await `Swagger running in http://localhost:${port}/documentacion`);
+  await app.init();
+  serverHttps.listen(process.env.PORT || 3005);
+  logger.debug(
+    `Aplicación de backoffice administracion CHATBOT EPN esta corriendo en el puerto: ${serverHttps.address()["port"]}`
+  );
 }
 bootstrap();
