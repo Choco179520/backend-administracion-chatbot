@@ -22,6 +22,7 @@ export default registerAs('config', () => {
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
       schema: process.env.DATABASE_SCHEMA,
+      synchronize: process.env.DATABASE_SYNCHRONIZE,
     },
     url_chatbot: process.env.URL_CHATBOT_DB
   };
@@ -47,8 +48,7 @@ export const CONFIG_MODULE: ConfigModuleOptions = {
     DATABASE_USER: Joi.string().required(),
     DATABASE_PASSWORD: Joi.string().required(),
     DATABASE_NAME: Joi.string().required(),
-    DATABASE_SCHEMA: Joi.string().required(),
-
+    DATABASE_SYNCHRONIZE: Joi.boolean().required,
     /** URL conexion api de chatbot */
     URL_CHATBOT_DB: Joi.string().required(),
   }),

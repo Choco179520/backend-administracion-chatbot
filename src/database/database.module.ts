@@ -12,7 +12,7 @@ import {ENTIDADES_APLICATIVO} from '../common/entidades-aplicativo';
             name: 'default',
             useFactory: (_configService: ConfigType<typeof config>) => {
                 const env = process.env.NODE_ENV ?? 'dev';
-                const {port, database, password, username, schema, host} =
+                const {port, database, password, username, host, synchronize} =
                     _configService.db;
 
                 /** Validar si es local o en desarrollo (only credentials DB) */
@@ -34,7 +34,7 @@ import {ENTIDADES_APLICATIVO} from '../common/entidades-aplicativo';
                     password: pass,
                     database,
                     // logging: true,
-                    synchronize: true,
+                    synchronize: synchronize,
                     entities: ENTIDADES_APLICATIVO,
                     options: {
                         encrypt: true,
