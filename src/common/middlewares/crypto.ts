@@ -1,6 +1,5 @@
 import * as NodeRSA from 'node-rsa';
 import * as crypto from 'crypto';
-import {rethrow} from "@nestjs/core/helpers/rethrow";
 
 export class Crypto {
     static RsaDesencryptDb(data: any) {
