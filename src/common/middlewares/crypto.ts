@@ -1,10 +1,10 @@
-import * as NodeRSA from 'node-rsa';
-import * as crypto from 'crypto';
+import * as NodeRSA from "node-rsa";
+import * as crypto from "crypto";
 
 export class Crypto {
-    static RsaDesencryptDb(data: any) {
-        const keyD = new NodeRSA(
-            `-----BEGIN RSA PRIVATE KEY-----
+  static RsaDesencryptDb(data: any) {
+    const keyD = new NodeRSA(
+      `-----BEGIN RSA PRIVATE KEY-----
 MIIJKAIBAAKCAgBsByKXeRmiYXZlqwqCKBor2f/ov5fS9RS9hlf3YHXj3wVvEU0E
 dG1VTxdLfr3RpYsALKBQotcHCHJo0yrv+GFh+UhJCO3sb9Uij+NeCgogAjNsmfcs
 Bz1YuRB9FC6XmQy/2aopid5ce93049ZZk8pZ+gt/39RfDUwdtY8SBmRpt4lYakqy
@@ -54,13 +54,13 @@ c2n3CMUOh8scqEKo6NEY8dY+u13dTE6coigi/E+EuW3J1T2n2kb9Xn17STc0Qxxr
 VfwAM5VJitIzzKeMkinZHldoHXtR16glTtjlyCu2l5DRw3yp03WO7wg+dhVMmnqh
 HfFqwRhxbx5XjksGibVAKDqU15L/S4JF8ar1BLKy+i6lj47gsE54DcgLUk/TXqTq
 lZsVMKFjPypI84MKBHFCOEKPVr9uYQGLE14b6TY19zeehSZPmCR9su4cgdY=
------END RSA PRIVATE KEY-----`,
-        );
-        return keyD.decrypt(data, 'utf8');
-    }
+-----END RSA PRIVATE KEY-----`
+    );
+    return keyD.decrypt(data, "utf8");
+  }
 
-    static RsaEencryptDb(data: any): string {
-        const publicKey = `-----BEGIN PUBLIC KEY-----
+  static RsaEencryptDb(data: any): string {
+    const publicKey = `-----BEGIN PUBLIC KEY-----
 MIICITANBgkqhkiG9w0BAQEFAAOCAg4AMIICCQKCAgBsByKXeRmiYXZlqwqCKBor
 2f/ov5fS9RS9hlf3YHXj3wVvEU0EdG1VTxdLfr3RpYsALKBQotcHCHJo0yrv+GFh
 +UhJCO3sb9Uij+NeCgogAjNsmfcsBz1YuRB9FC6XmQy/2aopid5ce93049ZZk8pZ
@@ -75,15 +75,15 @@ e5z209xJlZ0bCWXfi1m8n7A0dvIcQv4VsrIWNiFXXIBOmZOQrB1hxFKLHv0I4k0Q
 8UcoRomo5osj3Wc/iePyBQIDAQAB
 -----END PUBLIC KEY-----`;
 
-        const key = new NodeRSA();
-        key.importKey(publicKey, 'pkcs8-public');
-        key.setOptions({encryptionScheme: 'pkcs1'});
-        const padding = crypto.constants.RSA_PKCS1_PADDING;
-        const encrypted = crypto.publicEncrypt(
-            {key: key.exportKey('public'), padding},
-            Buffer.from(data),
-        );
-        const encryptedBase64 = encrypted.toString('base64');
-        return encryptedBase64;
-    }
+    const key = new NodeRSA();
+    key.importKey(publicKey, "pkcs8-public");
+    key.setOptions({ encryptionScheme: "pkcs1" });
+    const padding = crypto.constants.RSA_PKCS1_PADDING;
+    const encrypted = crypto.publicEncrypt(
+      { key: key.exportKey("public"), padding },
+      Buffer.from(data)
+    );
+    const encryptedBase64 = encrypted.toString("base64");
+    return encryptedBase64;
+  }
 }

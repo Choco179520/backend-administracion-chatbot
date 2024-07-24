@@ -22,7 +22,7 @@ import * as fs from "fs";
 import * as https from "https";
 
 const httpsOptions = {
-  pfx: fs.readFileSync(join(__dirname, "../src/certificates", "servidor.pfx")),
+  pfx: fs.readFileSync(join(__dirname, "certificates", "servidor.pfx")),
   passphrase: "servidor2023",
 };
 
