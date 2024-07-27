@@ -11,6 +11,8 @@ import { CreateResponseDto, UpdateResponseDto } from "../dtos/response.dto";
 import { ResponseService } from "./response.service";
 import { UtteranceService } from "./utterance.service";
 import { format } from "date-fns";
+import { promises as fs } from 'fs';
+import * as path from "path";
 
 @Injectable()
 export class ChatbotService {
@@ -237,13 +239,27 @@ export class ChatbotService {
 
   async putResponseLocal(id: number, payload: UpdateResponseDto) {
     try {
-      // console.log(id,'-- putResponseLocal --', payload);
+      const response = JSON.parse(payload.response);
+
+      if (payload.image) {
+        let image = payload.image;        
+        image = image.replace(/^data:image\/png;base64,/, ""); 
+        image += image.replace('+', ' ');
+        const buffer = Buffer.from(image, "base64");
+        const filePath = path.join(__dirname, "..", "./../public", response.path);
+        
+        await fs.mkdir(path.dirname(filePath), { recursive: true });
+        await fs.writeFile(filePath, buffer);        
+      }
+
       const jsonDocument = { estado: 0 };
       const act = await this._documentService.actualizarPorId(
         +payload.document,
         jsonDocument
       );
-      // console.log(act, 'update...', +payload.document);
+      console.log(act, 'update...', +payload.document);
+      delete payload.image;
+      console.log(payload, 'paylod...');
       return this._responseService.actualizarPorId(id, payload);
     } catch (err) {
       console.error(

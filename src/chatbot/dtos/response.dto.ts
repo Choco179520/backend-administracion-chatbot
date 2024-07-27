@@ -21,6 +21,10 @@ export class CreateResponseDto {
   @IsOptional()
   @IsInt()
   readonly document?: number;
+
+  @IsOptional()
+  @IsString()
+  image?: string;
 }
 
 export class UpdateResponseDto extends PartialType(CreateResponseDto) {}
