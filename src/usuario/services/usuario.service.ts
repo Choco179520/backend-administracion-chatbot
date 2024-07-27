@@ -64,8 +64,6 @@ export class UsuarioService extends PrincipalService<
         },
         "one"
       );
-
-      console.log(usuarioConsulta, 'consulta...');
       
       if (!usuarioConsulta) {
         throw new ErrorManager({
@@ -74,10 +72,7 @@ export class UsuarioService extends PrincipalService<
         });
       }
 
-      const comparar = await bcrypt.compare(password, usuarioConsulta.password);
-      console.log('password iguales', comparar);
-      
-
+      const comparar = await bcrypt.compare(password, usuarioConsulta.password);      
       if (!comparar) {
         throw new ErrorManager({
           type: "BAD_REQUEST",
@@ -85,7 +80,6 @@ export class UsuarioService extends PrincipalService<
         });
       }
 
-      console.log('password actualizado', usuarioConsulta.actualizadoPassword == 0);
       if (usuarioConsulta.actualizadoPassword == 0) {
         throw new ErrorManager({
           type: "BAD_REQUEST",
@@ -96,9 +90,7 @@ export class UsuarioService extends PrincipalService<
       const payload: PayloadToken = {
         rol: usuarioConsulta.rol,
         sub: usuarioConsulta.id,
-      };
-      console.log(this._configService.configuracion.expiracion, 'payload...', payload);
-      
+      };      
       const token = jwt.sign(
         payload,
         'B4ckOfficeFis',
@@ -106,8 +98,6 @@ export class UsuarioService extends PrincipalService<
           expiresIn: this._configService.configuracion.expiracion,
         }
       )
-      console.log('token...', token);
-
       const fechaUltimo = {
         fechaUltimoAcceso: moment().format("YYYY-MM-DD HH:mm:ss"),
         jwt: token
