@@ -97,6 +97,8 @@ export class UsuarioService extends PrincipalService<
         rol: usuarioConsulta.rol,
         sub: usuarioConsulta.id,
       };
+      console.log(this._configService.configuracion.expiracion, 'payload...', payload);
+      
       const token = jwt.sign(
         payload,
         Crypto.RsaDesencryptDb(this._configService.configuracion.secreto),
