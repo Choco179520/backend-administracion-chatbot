@@ -9,7 +9,8 @@ module.exports = {
         "PORT": '3005',
         //* SEGURIDAD
         "SEGURIDAD": true,
-        // TODO: db rapidazo y parametrica
+        "SECRETO": "Bp60yMmAWH258WIUS7q5bYjbmZgNHf16ZBTKBkNqXudKde70jcQMI3q9FHnsh20Vo9ysHL40bM8fDthAMXIRWet",
+        // TODO: db
         "DATABASE_HOST": 'database-chatbot-epn.cxmuqgq08wc4.us-east-2.rds.amazonaws.com',
         "DATABASE_PORT": '3306',
         "DATABASE_NAME": 'BACKOFFICE_CHATBOT',
@@ -26,7 +27,8 @@ module.exports = {
         "PORT": '3005',
         //* SEGURIDAD
         "SEGURIDAD": true,
-        // TODO: db rapidazo y parametrica
+        "SECRETO": "Bp60yMmAWH258WIUS7q5bYjbmZgNHf16ZBTKBkNqXudKde70jcQMI3q9FHnsh20Vo9ysHL40bM8fDthAMXIRWet",
+        // TODO: db 
         "DATABASE_HOST": 'database-chatbot-epn.cxmuqgq08wc4.us-east-2.rds.amazonaws.com',
         "DATABASE_PORT": '3306',
         "DATABASE_NAME": 'BACKOFFICE_CHATBOT',
