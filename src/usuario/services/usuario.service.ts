@@ -101,7 +101,7 @@ export class UsuarioService extends PrincipalService<
       
       const token = jwt.sign(
         payload,
-        Crypto.RsaDesencryptDb(this._configService.configuracion.secreto),
+        'B4ckOfficeFis',
         {
           expiresIn: this._configService.configuracion.expiracion,
         }

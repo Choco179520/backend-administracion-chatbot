@@ -42,7 +42,7 @@ export class ProtegerControllerGuard implements CanActivate {
             } else {
                 const token = autorizacion[1];
                 try {
-                    const verificar = jwt.verify(token, Crypto.RsaDesencryptDb(this._configService.configuracion.secreto));
+                    const verificar = jwt.verify(token, 'B4ckOfficeFis');
                     request.decoded = verificar;
 
                     request.id = request.decoded.sub;

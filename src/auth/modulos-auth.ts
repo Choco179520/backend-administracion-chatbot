@@ -2,7 +2,6 @@ import {JwtModule} from '@nestjs/jwt';
 import config from "../environment/config";
 import {ConfigModule, ConfigType} from "@nestjs/config";
 import {PassportModule} from "@nestjs/passport";
-import {Crypto} from "./../common/middlewares/crypto";
 
 export const MODULOS_AUTH = [
     PassportModule.register({ defaultStrategy: 'jwt' }),
@@ -10,7 +9,7 @@ export const MODULOS_AUTH = [
         imports: [ConfigModule],
         useFactory: (_configService: ConfigType<typeof config>) => {
             return {
-                secret: Crypto.RsaDesencryptDb(_configService.configuracion.secreto),
+                secret: 'B4ckOfficeFis',
                 signOptions: {
                     expiresIn: _configService.configuracion.expiracion
                 },

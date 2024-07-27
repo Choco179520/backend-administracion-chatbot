@@ -11,11 +11,11 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       @Inject(config.KEY)
       private readonly _configService: ConfigType<typeof config>,
   ) {
-    console.log(_configService.configuracion.secreto, 'secreto strategy...');
+    console.log('B4ckOfficeFis', 'secreto strategy...');
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: Crypto.RsaDesencryptDb(_configService.configuracion.secreto),
+      secretOrKey: 'B4ckOfficeFis',
     });
   }
 
