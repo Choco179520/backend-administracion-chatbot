@@ -23,7 +23,7 @@
     "migrations:show": "npm run typeorm -- migration:show",
     "migrations:drop": "npm run typeorm -- schema:drop",
     "deploy:dev": "pm2 start ecosystem.config.js --env test --only backend-chatbot-epn",
-    "deploy:prod": "pm2 start ecosystem.config.js --env production --only backend-chatbot-epn"
+    "deploy:prod": "npm run start ecosystem.config.js --env production --only backend-chatbot-epn"
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.2",

@@ -11,7 +11,6 @@ export default registerAs('config', () => {
       certificatePassword: process.env.CERTIFICATE_PASSWORD,
       secreto: process.env.SECRETO,
       hashSalt: process.env.HASH_SALT,
-      passwordGenerico: process.env.PASSWORD_GENERICO,
       expiracion: process.env.EXPIRACION,
       seguridad: process.env.SEGURIDAD,
     },
@@ -39,7 +38,6 @@ export const CONFIG_MODULE: ConfigModuleOptions = {
     CERTIFICATE_PASSWORD: Joi.string().required(),
     SECRETO: Joi.string().required(),
     HASH_SALT: Joi.number().required(),
-    PASSWORD_GENERICO: Joi.string().required(),
     EXPIRACION: Joi.string().required(),
 
     /** Database SQL */

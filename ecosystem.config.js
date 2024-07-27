@@ -7,6 +7,8 @@ module.exports = {
         //* Ambiente de QA
         "NODE_ENV": 'test',
         "PORT": '3005',
+        "HASH_SALT": '10',
+        "EXPIRACION": "240min",
         //* SEGURIDAD
         "SEGURIDAD": true,
         "SECRETO": "Bp60yMmAWH258WIUS7q5bYjbmZgNHf16ZBTKBkNqXudKde70jcQMI3q9FHnsh20Vo9ysHL40bM8fDthAMXIRWet",
@@ -25,6 +27,8 @@ module.exports = {
         //* Ambiente de PROD
         "NODE_ENV": 'production',
         "PORT": '3005',
+        "HASH_SALT": '10',
+        "EXPIRACION": "240min",
         //* SEGURIDAD
         "SEGURIDAD": true,
         "SECRETO": "Bp60yMmAWH258WIUS7q5bYjbmZgNHf16ZBTKBkNqXudKde70jcQMI3q9FHnsh20Vo9ysHL40bM8fDthAMXIRWet",

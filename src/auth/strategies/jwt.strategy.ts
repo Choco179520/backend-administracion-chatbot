@@ -11,6 +11,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       @Inject(config.KEY)
       private readonly _configService: ConfigType<typeof config>,
   ) {
+    console.log(_configService.configuracion.secreto, 'secreto strategy...');
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
