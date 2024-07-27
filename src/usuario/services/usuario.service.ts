@@ -75,6 +75,8 @@ export class UsuarioService extends PrincipalService<
       }
 
       const comparar = await bcrypt.compare(password, usuarioConsulta.password);
+      console.log('password iguales', comparar);
+      
 
       if (!comparar) {
         throw new ErrorManager({
@@ -83,6 +85,7 @@ export class UsuarioService extends PrincipalService<
         });
       }
 
+      console.log('password actualizado', usuarioConsulta.actualizadoPassword == 0);
       if (usuarioConsulta.actualizadoPassword == 0) {
         throw new ErrorManager({
           type: "BAD_REQUEST",
@@ -94,20 +97,23 @@ export class UsuarioService extends PrincipalService<
         rol: usuarioConsulta.rol,
         sub: usuarioConsulta.id,
       };
+      const token = jwt.sign(
+        payload,
+        Crypto.RsaDesencryptDb(this._configService.configuracion.secreto),
+        {
+          expiresIn: this._configService.configuracion.expiracion,
+        }
+      )
+      console.log('token...', token);
 
       const fechaUltimo = {
         fechaUltimoAcceso: moment().format("YYYY-MM-DD HH:mm:ss"),
+        jwt: token
       };
       await this._usuarioRepository.update(usuarioConsulta.id, fechaUltimo);
 
       return {
-        accessToken: jwt.sign(
-          payload,
-          Crypto.RsaDesencryptDb(this._configService.configuracion.secreto),
-          {
-            expiresIn: this._configService.configuracion.expiracion,
-          }
-        ),
+        token,
         usuarioConsulta,
       };
     } catch (error) {
