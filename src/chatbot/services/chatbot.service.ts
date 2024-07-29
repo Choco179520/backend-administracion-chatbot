@@ -11,7 +11,7 @@ import { CreateResponseDto, UpdateResponseDto } from "../dtos/response.dto";
 import { ResponseService } from "./response.service";
 import { UtteranceService } from "./utterance.service";
 import { format } from "date-fns";
-import { promises as fs } from 'fs';
+import { promises as fs } from "fs";
 import * as path from "path";
 
 @Injectable()
@@ -242,14 +242,19 @@ export class ChatbotService {
       const response = JSON.parse(payload.response);
 
       if (payload.image) {
-        let image = payload.image;        
-        image = image.replace(/^data:image\/png;base64,/, ""); 
-        image += image.replace('+', ' ');
+        let image = payload.image;
+        image = image.replace(/^data:image\/png;base64,/, "");
+        image += image.replace("+", " ");
         const buffer = Buffer.from(image, "base64");
-        const filePath = path.join(__dirname, "..", "./../public", response.path);
-        
+        const filePath = path.join(
+          __dirname,
+          "..",
+          "./../public",
+          response.path
+        );
+
         await fs.mkdir(path.dirname(filePath), { recursive: true });
-        await fs.writeFile(filePath, buffer);        
+        await fs.writeFile(filePath, buffer);
       }
 
       const jsonDocument = { estado: 0 };
@@ -257,9 +262,9 @@ export class ChatbotService {
         +payload.document,
         jsonDocument
       );
-      console.log(act, 'update...', +payload.document);
+      console.log(act, "update...", +payload.document);
       delete payload.image;
-      console.log(payload, 'paylod...');
+      console.log(payload, "paylod...");
       return this._responseService.actualizarPorId(id, payload);
     } catch (err) {
       console.error(
@@ -332,6 +337,39 @@ export class ChatbotService {
   }
 
   /** Servicios para manejar el chatbot */
+  async postImages(data: string, nombre: string) {
+    try {
+      let documents;
+      const pathPostDocuments = this.url + `/post-image`;
+
+      Logger.verbose(`Post images to server....`);
+      console.log(pathPostDocuments, "path...");
+
+      documents = await firstValueFrom(
+        this._httpService.post(pathPostDocuments, {image: data, nombre}).pipe(
+          map((response) => {
+            if (response.status == 201) {
+              return response.data;
+            }
+          }),
+          catchError((err1) => {
+            throw this.errorHandlerService.handleCustomError(err1.response);
+          })
+        )
+      );
+      return documents;
+    } catch (err) {
+      console.error(
+        "Error enviar imagenes servidor - No se pudo obtener la lista de documentos",
+        {
+          error: err.response,
+        }
+      );
+      Logger.error("_chatbotService.postImages(), ocurrio un error");
+      this.errorHandlerService.handleCustomError(err.response);
+    }
+  }
+
   async postDocument(data) {
     try {
       let documents;
@@ -643,8 +681,29 @@ export class ChatbotService {
   }
 
   /** Manejar base local y chatbot */
+  async getImages() {
+    try {
+      const filePath = path.join(__dirname, "..", "./../public");
+      const files = await fs.readdir(filePath);
+      const images = files.filter((file) => /\.(png)$/i.test(file));
+      if (images.length > 0) {
+        for (let image of images) {
+          Logger.verbose('Imagen', image)
+          const pathImage = path.join(filePath, image);
+          const fileBuffer = await fs.readFile(pathImage);
+          const bufferString = fileBuffer.toString("base64");
+          this.postImages(bufferString, image);
+        }
+        return;
+      }
+    } catch (err) {
+      throw new Error(`Error reading directory: ${err.message}`);
+    }
+  }
+
   async getChatbot() {
     try {
+      Logger.verbose("Sincronizar base de datos chatbot", "CHATBOT");
       const json = {
         where: [{ estado: 0 }, { eliminar: 1 }],
         relations: ["responses", "utterances"],
@@ -707,6 +766,10 @@ export class ChatbotService {
           }
         }
       }
+
+      /** Sincronizar imagenes cargadas */
+      Logger.verbose('Inicia sincronizar imagenes...', 'CHATBOT');
+      await this.getImages();
 
       await this.synchronizeDocuments();
       setTimeout(async () => {
