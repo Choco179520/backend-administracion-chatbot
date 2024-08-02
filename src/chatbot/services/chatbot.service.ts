@@ -220,6 +220,24 @@ export class ChatbotService {
   async postResponseLocal(payload: CreateResponseDto) {
     try {
       const jsonDocument = { estado: 0 };
+      const response = JSON.parse(payload.response);
+
+      if (payload.image) {
+        let image = payload.image;
+        image = image.replace(/^data:image\/png;base64,/, "");
+        image += image.replace("+", " ");
+        const buffer = Buffer.from(image, "base64");
+        const filePath = path.join(
+          __dirname,
+          "..",
+          "./../public",
+          response.path
+        );
+
+        await fs.mkdir(path.dirname(filePath), { recursive: true });
+        await fs.writeFile(filePath, buffer);
+      }
+
       await this._documentService.actualizarPorId(
         payload.document,
         jsonDocument
@@ -343,10 +361,9 @@ export class ChatbotService {
       const pathPostDocuments = this.url + `/post-image`;
 
       Logger.verbose(`Post images to server....`);
-      console.log(pathPostDocuments, "path...");
 
       documents = await firstValueFrom(
-        this._httpService.post(pathPostDocuments, {image: data, nombre}).pipe(
+        this._httpService.post(pathPostDocuments, { image: data, nombre }).pipe(
           map((response) => {
             if (response.status == 201) {
               return response.data;
@@ -688,7 +705,7 @@ export class ChatbotService {
       const images = files.filter((file) => /\.(png)$/i.test(file));
       if (images.length > 0) {
         for (let image of images) {
-          Logger.verbose('Imagen', image)
+          Logger.verbose("Imagen", image);
           const pathImage = path.join(filePath, image);
           const fileBuffer = await fs.readFile(pathImage);
           const bufferString = fileBuffer.toString("base64");
@@ -703,6 +720,7 @@ export class ChatbotService {
 
   async getChatbot() {
     try {
+      // await this.synchronizeDocuments();
       Logger.verbose("Sincronizar base de datos chatbot", "CHATBOT");
       const json = {
         where: [{ estado: 0 }, { eliminar: 1 }],
@@ -713,11 +731,21 @@ export class ChatbotService {
         "many"
       );
 
-      if (registros) {
+      console.log('existen registros', registros);
+      
+
+      if (registros.length > 0) {
+        /** Sincronizar imagenes cargadas */
+        Logger.verbose("Inicia sincronizar imagenes...", "CHATBOT");
+        await this.getImages();
+        
         for (let reg of registros) {
-          if (reg.eliminar == 1 && reg.estado == 1) {
+          if (reg.eliminar == 1 && reg.estado == 1 && reg.idChatbotDocuments) {
             Logger.verbose("Eliminar registro chatbot");
             const eliminar = await this.deleteResponses(reg.idChatbotResponse);
+            if (eliminar) {
+              await this._documentService.deletePorId(reg.id);
+            }
           } else if (reg.idChatbotResponse) {
             Logger.verbose("Actualizar registro chatbot");
             let respuestas = [];
@@ -741,6 +769,10 @@ export class ChatbotService {
               utterances: expresiones,
             };
             await this.putDocuments(+reg.idChatbotDocuments, jsonDoc);
+            this._documentService.actualizarPorId(reg.id, {
+              estado: 1,
+              eliminar: 0,
+            });
           } else {
             Logger.verbose("Nuevo registro chatbot");
             let respuestas = [];
@@ -762,25 +794,30 @@ export class ChatbotService {
               title: reg.title,
               response_set_id: respResponses.id,
             };
-            await this.postDocument(jsonDoc);
+            const respDocument = await this.postDocument(jsonDoc);
+            this._documentService.actualizarPorId(reg.id, {
+              idChatbotDocuments: respDocument.id,
+              idChatbotResponse: respResponses.id,
+              estado: 1,
+            });
           }
         }
+
+              // await this.synchronizeDocuments();
+        setTimeout(async () => {
+          const respRegistros = await this.getDocumentsLocal();
+          return { registros, respRegistros };
+        }, 10000);
+      } else {
+        Logger.error("_chatbotService.getChatbot(), No existen registros...");
+        return this.errorHandlerService.handleCustomError({status: 404, message: 'No existen'});
       }
 
-      /** Sincronizar imagenes cargadas */
-      Logger.verbose('Inicia sincronizar imagenes...', 'CHATBOT');
-      await this.getImages();
-
-      await this.synchronizeDocuments();
-      setTimeout(async () => {
-        const respRegistros = await this.getDocumentsLocal();
-        return { registros, respRegistros };
-      }, 10000);
     } catch (err) {
       console.error(
         "Error obtener documentos - No se pudo obtener la lista de documentos",
         {
-          error: err.response,
+          error: err.response?.code,
         }
       );
       Logger.error("_chatbotService.getChatbot(), ocurrio un error");
